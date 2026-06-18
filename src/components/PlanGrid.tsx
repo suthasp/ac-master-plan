@@ -159,6 +159,24 @@ export default function PlanGrid({ year = 2026 }: Props) {
     setRowData(prev => [...prev, newRow]);
   }, []);
 
+  // ── Delete row ──────────────────────────────────────────────────────────────
+  const deleteRow = useCallback(async (id: string, name: string) => {
+    if (!confirm(`Delete site "${name}"? This also removes all its plan entries.`)) return;
+
+    // optimistic removal
+    setRowData(prev => prev.filter(r => r.id !== id));
+    try {
+      const res = await fetch("/api/sites", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id }),
+      });
+      if (!res.ok) throw new Error("delete failed");
+    } catch {
+      fetchData(); // reload to restore on failure
+    }
+  }, [fetchData]);
+
   // ── Export ──────────────────────────────────────────────────────────────────
   const exportCsv = useCallback(() => {
     gridRef.current?.api.exportDataAsCsv({ fileName: `ac-plan-${year}.csv` });
@@ -167,6 +185,27 @@ export default function PlanGrid({ year = 2026 }: Props) {
   // ── Column definitions ──────────────────────────────────────────────────────
   const columnDefs = useMemo<(ColDef | ColGroupDef)[]>(() => {
     const pinned: ColDef[] = [
+      {
+        headerName: "",
+        colId: "__delete__",
+        pinned: "left",
+        width: 36,
+        sortable: false,
+        filter: false,
+        resizable: false,
+        suppressMenu: true,
+        cellStyle: { padding: "0", textAlign: "center" },
+        cellRenderer: (p: { data?: RowData }) =>
+          p.data && p.data.id !== "__summary__" ? (
+            <button
+              onClick={() => deleteRow(p.data!.id as string, p.data!.name)}
+              title="Delete site"
+              className="text-red-400 hover:text-red-600 leading-none"
+            >
+              ✕
+            </button>
+          ) : null,
+      },
       { field: "name", headerName: "Site", pinned: "left", width: 160, cellStyle: { fontWeight: 600 } },
       { field: "ac_count", headerName: "# AC", pinned: "left", width: 55, type: "numericColumn" },
       { field: "ac_type", headerName: "Type", pinned: "left", width: 80 },
@@ -192,7 +231,7 @@ export default function PlanGrid({ year = 2026 }: Props) {
     }));
 
     return [...pinned, ...monthGroups];
-  }, [currentWeek]);
+  }, [currentWeek, deleteRow]);
 
   // ── Summary pinned bottom row ───────────────────────────────────────────────
   const pinnedBottomRowData = useMemo<RowData[]>(() => {
