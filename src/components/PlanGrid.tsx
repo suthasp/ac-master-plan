@@ -185,8 +185,6 @@ export default function PlanGrid({ year = 2026 }: Props) {
         headerClass: w === currentWeek ? "current-week-header" : "",
         cellClass: (params: { value: string }) =>
           cellClass(params.value, w, currentWeek),
-        cellRenderer: (params: { value: string }) =>
-          params.value ? `<span>${params.value}</span>` : "",
         suppressMenu: true,
         sortable: false,
       } as ColDef)),
