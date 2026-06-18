@@ -6,6 +6,7 @@ import type {
   ColDef,
   ColGroupDef,
   CellClickedEvent,
+  CellValueChangedEvent,
   GridReadyEvent,
   GetRowIdParams,
 } from "ag-grid-community";
@@ -142,6 +143,28 @@ export default function PlanGrid({ year = 2026, isAdmin = false }: Props) {
     }
   }, [year]);
 
+  // ── Edit site field (admin inline edit) ──────────────────────────────────────
+  const onCellValueChanged = useCallback(async (e: CellValueChangedEvent<RowData>) => {
+    const field = e.colDef.field;
+    if (!field || field.startsWith("wk_")) return; // week status handled by onCellClicked
+    const row = e.data;
+    if (row.id === "__summary__" || e.oldValue === e.newValue) return;
+
+    setSaving(true);
+    try {
+      const res = await fetch("/api/sites", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: row.id, [field]: e.newValue }),
+      });
+      if (!res.ok) throw new Error("update failed");
+    } catch {
+      e.node.setDataValue(field, e.oldValue); // rollback
+    } finally {
+      setSaving(false);
+    }
+  }, []);
+
   // ── Add row ─────────────────────────────────────────────────────────────────
   const addRow = useCallback(async () => {
     const name = prompt("Site name:");
@@ -185,6 +208,10 @@ export default function PlanGrid({ year = 2026, isAdmin = false }: Props) {
 
   // ── Column definitions ──────────────────────────────────────────────────────
   const columnDefs = useMemo<(ColDef | ColGroupDef)[]>(() => {
+    // site fields are editable only for admins (never the SUMMARY row)
+    const siteEditable = (p: { data?: RowData }) =>
+      isAdmin && p.data?.id !== "__summary__";
+
     const pinned: ColDef[] = [
       ...(isAdmin
         ? [{
@@ -209,12 +236,14 @@ export default function PlanGrid({ year = 2026, isAdmin = false }: Props) {
               ) : null,
           } as ColDef]
         : []),
-      { field: "name", headerName: "Site", pinned: "left", width: 160, cellStyle: { fontWeight: 600 } },
-      { field: "ac_count", headerName: "# AC", pinned: "left", width: 55, type: "numericColumn" },
-      { field: "ac_type", headerName: "Type", pinned: "left", width: 80 },
-      { field: "source_1", headerName: "Src 1", pinned: "left", width: 65 },
-      { field: "source_2", headerName: "Src 2", pinned: "left", width: 65 },
-      { field: "source_3", headerName: "Src 3", pinned: "left", width: 65 },
+      { field: "name", headerName: "Site", pinned: "left", width: 160, cellStyle: { fontWeight: 600 }, editable: siteEditable },
+      { field: "ac_count", headerName: "# AC", pinned: "left", width: 55, type: "numericColumn", editable: siteEditable,
+        valueParser: p => parseInt(p.newValue, 10) || 0 },
+      { field: "ac_type", headerName: "Type", pinned: "left", width: 80, editable: siteEditable,
+        cellEditor: "agSelectCellEditor", cellEditorParams: { values: ["Precision", "Split"] } },
+      { field: "source_1", headerName: "Src 1", pinned: "left", width: 65, editable: siteEditable },
+      { field: "source_2", headerName: "Src 2", pinned: "left", width: 65, editable: siteEditable },
+      { field: "source_3", headerName: "Src 3", pinned: "left", width: 65, editable: siteEditable },
     ];
 
     const monthGroups: ColGroupDef[] = MONTHS.map(month => ({
@@ -332,6 +361,7 @@ export default function PlanGrid({ year = 2026, isAdmin = false }: Props) {
             getRowId={getRowId}
             quickFilterText={filterText}
             onCellClicked={onCellClicked}
+            onCellValueChanged={onCellValueChanged}
             onGridReady={onGridReady}
             rowHeight={28}
             headerHeight={32}
