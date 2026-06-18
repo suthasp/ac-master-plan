@@ -7,7 +7,6 @@ import type {
   ColGroupDef,
   CellClickedEvent,
   CellValueChangedEvent,
-  GridReadyEvent,
   GetRowIdParams,
 } from "ag-grid-community";
 import "ag-grid-community/styles/ag-grid.css";
@@ -314,10 +313,6 @@ export default function PlanGrid({ year = 2026, isAdmin = false }: Props) {
 
   const getRowId = useCallback((p: GetRowIdParams<RowData>) => p.data.id as string, []);
 
-  const onGridReady = useCallback((e: GridReadyEvent) => {
-    e.api.sizeColumnsToFit();
-  }, []);
-
   // ── Render ──────────────────────────────────────────────────────────────────
   return (
     <div className="flex flex-col h-screen bg-[#0d0d1a] text-white">
@@ -391,7 +386,6 @@ export default function PlanGrid({ year = 2026, isAdmin = false }: Props) {
             quickFilterText={filterText}
             onCellClicked={onCellClicked}
             onCellValueChanged={onCellValueChanged}
-            onGridReady={onGridReady}
             rowHeight={28}
             headerHeight={32}
             groupHeaderHeight={28}
