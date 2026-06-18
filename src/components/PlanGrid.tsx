@@ -275,7 +275,7 @@ export default function PlanGrid({ year = 2026 }: Props) {
       </div>
 
       {/* Grid */}
-      <div className="ag-theme-alpine-dark flex-1 overflow-hidden">
+      <div className="ag-theme-alpine-dark flex-1 overflow-auto">
         {loading ? (
           <div className="flex items-center justify-center h-full text-gray-400">
             Loading data...
@@ -283,6 +283,7 @@ export default function PlanGrid({ year = 2026 }: Props) {
         ) : (
           <AgGridReact<RowData>
             ref={gridRef}
+            domLayout="autoHeight"
             rowData={rowData}
             columnDefs={columnDefs}
             pinnedBottomRowData={pinnedBottomRowData}
