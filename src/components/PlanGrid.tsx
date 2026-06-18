@@ -86,6 +86,11 @@ export default function PlanGrid({ year = 2026, isAdmin = false }: Props) {
   const [saving, setSaving] = useState(false);
   const currentWeek = useMemo(() => getCurrentWeek(), []);
 
+  // ── Add-site modal form ───────────────────────────────────────────────────────
+  const emptyForm = { name: "", ac_count: "", ac_type: "Precision", source_1: "", source_2: "", source_3: "" };
+  const [showAdd, setShowAdd] = useState(false);
+  const [form, setForm] = useState(emptyForm);
+
   // ── Fetch data ──────────────────────────────────────────────────────────────
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -165,23 +170,40 @@ export default function PlanGrid({ year = 2026, isAdmin = false }: Props) {
     }
   }, []);
 
-  // ── Add row ─────────────────────────────────────────────────────────────────
-  const addRow = useCallback(async () => {
-    const name = prompt("Site name:");
-    if (!name) return;
-    const acCount = parseInt(prompt("Number of AC:") ?? "1");
-    const acType = prompt("Type (Precision/Split):") ?? "Precision";
+  // ── Add row (modal form) ──────────────────────────────────────────────────────
+  const openAdd = useCallback(() => {
+    setForm(emptyForm);
+    setShowAdd(true);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-    const res = await fetch("/api/sites", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, ac_count: acCount, ac_type: acType }),
-    });
-    const newSite: Site = await res.json();
-    const newRow: RowData = { ...newSite };
-    for (let w = 1; w <= 52; w++) newRow[`wk_${w}`] = "";
-    setRowData(prev => [...prev, newRow]);
-  }, []);
+  const submitAdd = useCallback(async () => {
+    if (!form.name.trim()) return;
+    setSaving(true);
+    try {
+      const res = await fetch("/api/sites", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: form.name.trim(),
+          ac_count: parseInt(form.ac_count, 10) || 0,
+          ac_type: form.ac_type,
+          source_1: form.source_1.trim() || null,
+          source_2: form.source_2.trim() || null,
+          source_3: form.source_3.trim() || null,
+        }),
+      });
+      if (!res.ok) throw new Error("add failed");
+      const newSite: Site = await res.json();
+      const newRow: RowData = { ...newSite };
+      for (let w = 1; w <= 52; w++) newRow[`wk_${w}`] = "";
+      setRowData(prev => [...prev, newRow]);
+      setShowAdd(false);
+    } catch {
+      alert("Failed to add site");
+    } finally {
+      setSaving(false);
+    }
+  }, [form]);
 
   // ── Delete row ──────────────────────────────────────────────────────────────
   const deleteRow = useCallback(async (id: string, name: string) => {
@@ -314,7 +336,7 @@ export default function PlanGrid({ year = 2026, isAdmin = false }: Props) {
         />
 
         <button
-          onClick={addRow}
+          onClick={openAdd}
           className="bg-blue-600 hover:bg-blue-700 text-white text-sm px-3 py-1 rounded transition-colors"
         >
           + Add Site
@@ -386,6 +408,90 @@ export default function PlanGrid({ year = 2026, isAdmin = false }: Props) {
           />
         )}
       </div>
+
+      {/* Add Site modal */}
+      {showAdd && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60"
+          onClick={() => setShowAdd(false)}
+        >
+          <div
+            className="bg-[#1a1a2e] border border-[#2d3561] rounded-lg w-[360px] p-5 shadow-xl"
+            onClick={e => e.stopPropagation()}
+          >
+            <h2 className="text-lg font-bold text-blue-300 mb-4">+ เพิ่ม Site ใหม่</h2>
+
+            <div className="space-y-3 text-sm">
+              <label className="block">
+                <span className="text-gray-300">ชื่อ Site <span className="text-red-400">*</span></span>
+                <input
+                  autoFocus
+                  type="text"
+                  value={form.name}
+                  onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
+                  onKeyDown={e => { if (e.key === "Enter") submitAdd(); }}
+                  className="mt-1 w-full bg-[#0f3460] border border-[#2d3561] text-white rounded px-3 py-1.5 focus:outline-none focus:border-blue-500"
+                />
+              </label>
+
+              <div className="grid grid-cols-2 gap-3">
+                <label className="block">
+                  <span className="text-gray-300">จำนวนทั้งหมด</span>
+                  <input
+                    type="number"
+                    value={form.ac_count}
+                    onChange={e => setForm(f => ({ ...f, ac_count: e.target.value }))}
+                    className="mt-1 w-full bg-[#0f3460] border border-[#2d3561] text-white rounded px-3 py-1.5 focus:outline-none focus:border-blue-500"
+                  />
+                </label>
+                <label className="block">
+                  <span className="text-gray-300">Type</span>
+                  <select
+                    value={form.ac_type}
+                    onChange={e => setForm(f => ({ ...f, ac_type: e.target.value }))}
+                    className="mt-1 w-full bg-[#0f3460] border border-[#2d3561] text-white rounded px-3 py-1.5 focus:outline-none focus:border-blue-500"
+                  >
+                    <option value="Precision">Precision</option>
+                    <option value="Split">Split</option>
+                  </select>
+                </label>
+              </div>
+
+              <div className="grid grid-cols-3 gap-3">
+                {([1, 2, 3] as const).map(n => (
+                  <label key={n} className="block">
+                    <span className="text-gray-300">รอบที่ {n}</span>
+                    <input
+                      type="text"
+                      value={form[`source_${n}` as "source_1" | "source_2" | "source_3"]}
+                      onChange={e =>
+                        setForm(f => ({ ...f, [`source_${n}`]: e.target.value }))
+                      }
+                      className="mt-1 w-full bg-[#0f3460] border border-[#2d3561] text-white rounded px-2 py-1.5 focus:outline-none focus:border-blue-500"
+                    />
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-2 mt-5">
+              <button
+                onClick={() => setShowAdd(false)}
+                className="px-4 py-1.5 text-sm rounded border border-[#2d3561] text-gray-300 hover:bg-[#0f3460]"
+              >
+                ยกเลิก
+              </button>
+              <button
+                onClick={submitAdd}
+                disabled={!form.name.trim() || saving}
+                className="px-4 py-1.5 text-sm rounded bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-50"
+              >
+                {saving ? "กำลังบันทึก..." : "บันทึก"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
