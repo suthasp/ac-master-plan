@@ -15,6 +15,10 @@ export async function GET() {
 
 export async function POST(request: Request) {
   const supabase = createClient();
+
+  const denied = await requireAdmin(supabase);
+  if (denied) return denied;
+
   const body = await request.json();
   const { data, error } = await supabase
     .from("sites")

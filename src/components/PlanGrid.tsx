@@ -335,12 +335,14 @@ export default function PlanGrid({ year = 2026, isAdmin = false }: Props) {
           className="bg-[#0f3460] border border-[#2d3561] text-white text-sm rounded px-3 py-1 w-48 focus:outline-none focus:border-blue-500"
         />
 
-        <button
-          onClick={openAdd}
-          className="bg-blue-600 hover:bg-blue-700 text-white text-sm px-3 py-1 rounded transition-colors"
-        >
-          + Add Site
-        </button>
+        {isAdmin && (
+          <button
+            onClick={openAdd}
+            className="bg-blue-600 hover:bg-blue-700 text-white text-sm px-3 py-1 rounded transition-colors"
+          >
+            + Add Site
+          </button>
+        )}
 
         <button
           onClick={exportCsv}
