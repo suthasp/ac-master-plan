@@ -183,6 +183,7 @@ export default function PlanGrid({ year = 2026 }: Props) {
         headerName: `WK${w}`,
         width: 38,
         headerClass: w === currentWeek ? "current-week-header" : "",
+        cellStyle: { padding: "0", textAlign: "center", fontSize: "11px" },
         cellClass: (params: { value: string }) =>
           cellClass(params.value, w, currentWeek),
         suppressMenu: true,
@@ -207,7 +208,8 @@ export default function PlanGrid({ year = 2026 }: Props) {
     for (let w = 1; w <= 52; w++) {
       const p = rowData.filter(r => r[`wk_${w}`] === "P").length;
       const f = rowData.filter(r => r[`wk_${w}`] === "F").length;
-      summary[`wk_${w}`] = p || f ? `P:${p} F:${f}` : "";
+      const total = p + f;
+      summary[`wk_${w}`] = total ? String(total) : "";
     }
     return [summary];
   }, [rowData]);
