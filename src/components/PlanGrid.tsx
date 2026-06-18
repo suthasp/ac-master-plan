@@ -270,7 +270,7 @@ export default function PlanGrid({ year = 2026, isAdmin = false }: Props) {
     const summary: RowData = {
       id: "__summary__",
       name: "SUMMARY",
-      ac_count: 0,
+      ac_count: rowData.reduce((sum, r) => sum + (Number(r.ac_count) || 0), 0),
       ac_type: "",
       source_1: null,
       source_2: null,
