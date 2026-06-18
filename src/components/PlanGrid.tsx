@@ -241,9 +241,9 @@ export default function PlanGrid({ year = 2026, isAdmin = false }: Props) {
         valueParser: p => parseInt(p.newValue, 10) || 0 },
       { field: "ac_type", headerName: "Type", pinned: "left", width: 80, editable: siteEditable,
         cellEditor: "agSelectCellEditor", cellEditorParams: { values: ["Precision", "Split"] } },
-      { field: "source_1", headerName: "รอบที่ 1/2026", pinned: "left", width: 100, editable: siteEditable },
-      { field: "source_2", headerName: "รอบที่ 2/2026", pinned: "left", width: 100, editable: siteEditable },
-      { field: "source_3", headerName: "รอบที่ 3/2026", pinned: "left", width: 100, editable: siteEditable },
+      { field: "source_1", headerName: "รอบที่ 1", pinned: "left", width: 100, editable: siteEditable },
+      { field: "source_2", headerName: "รอบที่ 2", pinned: "left", width: 100, editable: siteEditable },
+      { field: "source_3", headerName: "รอบที่ 3", pinned: "left", width: 100, editable: siteEditable },
     ];
 
     const monthGroups: ColGroupDef[] = MONTHS.map(month => ({
