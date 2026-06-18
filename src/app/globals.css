@@ -61,3 +61,16 @@ body {
 .ag-header-cell.current-week-header {
   background-color: rgba(250, 204, 21, 0.3) !important;
 }
+
+/* Week-number column headers: centered, compact */
+.ag-theme-alpine-dark .ag-header-cell.wk-header {
+  padding-left: 0;
+  padding-right: 0;
+}
+.ag-theme-alpine-dark .ag-header-cell.wk-header .ag-header-cell-label {
+  justify-content: center;
+}
+.ag-theme-alpine-dark .ag-header-cell.wk-header .ag-header-cell-text {
+  font-size: 10px;
+  font-weight: 600;
+}

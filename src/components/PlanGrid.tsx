@@ -180,9 +180,9 @@ export default function PlanGrid({ year = 2026 }: Props) {
       headerClass: "text-center font-bold",
       children: month.weeks.map(w => ({
         field: `wk_${w}`,
-        headerName: `WK${w}`,
+        headerName: `${w}`,
         width: 38,
-        headerClass: w === currentWeek ? "current-week-header" : "",
+        headerClass: ["wk-header", w === currentWeek ? "current-week-header" : ""],
         cellStyle: { padding: "0", textAlign: "center", fontSize: "11px" },
         cellClass: (params: { value: string }) =>
           cellClass(params.value, w, currentWeek),
