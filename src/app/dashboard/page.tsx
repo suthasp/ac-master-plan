@@ -7,5 +7,12 @@ export default async function DashboardPage() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  return <DashboardClient userEmail={user.email ?? ""} />;
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+  const isAdmin = profile?.role === "admin";
+
+  return <DashboardClient userEmail={user.email ?? ""} isAdmin={isAdmin} />;
 }

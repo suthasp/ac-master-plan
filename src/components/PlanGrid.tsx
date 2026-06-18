@@ -74,9 +74,10 @@ function cellClass(status: string, week: number, currentWeek: number) {
 
 interface Props {
   year?: number;
+  isAdmin?: boolean;
 }
 
-export default function PlanGrid({ year = 2026 }: Props) {
+export default function PlanGrid({ year = 2026, isAdmin = false }: Props) {
   const gridRef = useRef<AgGridReact<RowData>>(null);
   const [rowData, setRowData] = useState<RowData[]>([]);
   const [loading, setLoading] = useState(true);
@@ -185,27 +186,29 @@ export default function PlanGrid({ year = 2026 }: Props) {
   // ── Column definitions ──────────────────────────────────────────────────────
   const columnDefs = useMemo<(ColDef | ColGroupDef)[]>(() => {
     const pinned: ColDef[] = [
-      {
-        headerName: "",
-        colId: "__delete__",
-        pinned: "left",
-        width: 36,
-        sortable: false,
-        filter: false,
-        resizable: false,
-        suppressMenu: true,
-        cellStyle: { padding: "0", textAlign: "center" },
-        cellRenderer: (p: { data?: RowData }) =>
-          p.data && p.data.id !== "__summary__" ? (
-            <button
-              onClick={() => deleteRow(p.data!.id as string, p.data!.name)}
-              title="Delete site"
-              className="text-red-400 hover:text-red-600 leading-none"
-            >
-              ✕
-            </button>
-          ) : null,
-      },
+      ...(isAdmin
+        ? [{
+            headerName: "",
+            colId: "__delete__",
+            pinned: "left" as const,
+            width: 36,
+            sortable: false,
+            filter: false,
+            resizable: false,
+            suppressMenu: true,
+            cellStyle: { padding: "0", textAlign: "center" },
+            cellRenderer: (p: { data?: RowData }) =>
+              p.data && p.data.id !== "__summary__" ? (
+                <button
+                  onClick={() => deleteRow(p.data!.id as string, p.data!.name)}
+                  title="Delete site"
+                  className="text-red-400 hover:text-red-600 leading-none"
+                >
+                  ✕
+                </button>
+              ) : null,
+          } as ColDef]
+        : []),
       { field: "name", headerName: "Site", pinned: "left", width: 160, cellStyle: { fontWeight: 600 } },
       { field: "ac_count", headerName: "# AC", pinned: "left", width: 55, type: "numericColumn" },
       { field: "ac_type", headerName: "Type", pinned: "left", width: 80 },
@@ -231,7 +234,7 @@ export default function PlanGrid({ year = 2026 }: Props) {
     }));
 
     return [...pinned, ...monthGroups];
-  }, [currentWeek, deleteRow]);
+  }, [currentWeek, deleteRow, isAdmin]);
 
   // ── Summary pinned bottom row ───────────────────────────────────────────────
   const pinnedBottomRowData = useMemo<RowData[]>(() => {
