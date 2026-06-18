@@ -267,14 +267,19 @@ export default function PlanGrid({ year = 2026, isAdmin = false }: Props) {
 
   // ── Summary pinned bottom row ───────────────────────────────────────────────
   const pinnedBottomRowData = useMemo<RowData[]>(() => {
+    const sumSource = (field: string) => {
+      const total = rowData.reduce((sum, r) => sum + (Number(r[field]) || 0), 0);
+      return total ? String(total) : "";
+    };
+
     const summary: RowData = {
       id: "__summary__",
       name: "SUMMARY",
       ac_count: rowData.reduce((sum, r) => sum + (Number(r.ac_count) || 0), 0),
       ac_type: "",
-      source_1: null,
-      source_2: null,
-      source_3: null,
+      source_1: sumSource("source_1"),
+      source_2: sumSource("source_2"),
+      source_3: sumSource("source_3"),
     };
     for (let w = 1; w <= 52; w++) {
       const p = rowData.filter(r => r[`wk_${w}`] === "P").length;
