@@ -2,7 +2,41 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ── Theme tokens ─────────────────────────────────────────────────────────── */
+/* Dark is the default (no class on <html>); .light overrides for light mode.  */
 :root {
+  --app-bg: #0d0d1a;
+  --app-text: #e0e0e0;
+  --text-muted: #9ca3af;
+  --panel: #1a1a2e;     /* toolbar, modal, cards   */
+  --panel-2: #0f3460;   /* top bar, inputs, summary */
+  --border: #2d3561;
+}
+
+:root.light {
+  --app-bg: #f1f5f9;
+  --app-text: #0f172a;
+  --text-muted: #64748b;
+  --panel: #ffffff;
+  --panel-2: #e8eef7;
+  --border: #cbd5e1;
+}
+
+body {
+  background: var(--app-bg);
+  color: var(--app-text);
+  font-family: 'Segoe UI', sans-serif;
+}
+
+/* ── AG Grid theming ──────────────────────────────────────────────────────── */
+.ag-theme-alpine,
+.ag-theme-alpine-dark {
+  --ag-font-size: 12px;
+  --ag-cell-horizontal-padding: 4px;
+}
+
+/* Dark grid palette */
+.ag-theme-alpine-dark {
   --ag-background-color: #1a1a2e;
   --ag-odd-row-background-color: #16213e;
   --ag-header-background-color: #0f3460;
@@ -11,22 +45,15 @@
   --ag-border-color: #2d3561;
   --ag-row-hover-color: #1a2a5e;
   --ag-selected-row-background-color: #1a3a6e;
-  --ag-font-size: 12px;
-  --ag-cell-horizontal-padding: 4px;
 }
 
-body {
-  background: #0d0d1a;
-  color: #e0e0e0;
-  font-family: 'Segoe UI', sans-serif;
-}
-
+.ag-theme-alpine .ag-header-group-cell,
 .ag-theme-alpine-dark .ag-header-group-cell {
   font-weight: 700;
   text-align: center;
 }
 
-/* Status cell colors */
+/* Status cell colors (same in both themes) */
 .cell-planned {
   background-color: #ffffff !important;
   color: #000000 !important;
@@ -34,6 +61,11 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+/* keep "Planned" white cells visible on a white light-mode grid */
+:root.light .cell-planned {
+  border: 1px solid #94a3b8;
 }
 
 .cell-finished {
@@ -63,14 +95,14 @@ body {
 }
 
 /* Week-number column headers: centered, compact */
-.ag-theme-alpine-dark .ag-header-cell.wk-header {
+.ag-header-cell.wk-header {
   padding-left: 0;
   padding-right: 0;
 }
-.ag-theme-alpine-dark .ag-header-cell.wk-header .ag-header-cell-label {
+.ag-header-cell.wk-header .ag-header-cell-label {
   justify-content: center;
 }
-.ag-theme-alpine-dark .ag-header-cell.wk-header .ag-header-cell-text {
+.ag-header-cell.wk-header .ag-header-cell-text {
   font-size: 10px;
   font-weight: 600;
 }

@@ -26,31 +26,31 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#0d0d1a]">
-      <div className="bg-[#1a1a2e] border border-[#2d3561] rounded-xl p-8 w-full max-w-sm shadow-2xl">
-        <h1 className="text-2xl font-bold text-white mb-2 text-center">AMC Air Conditioning</h1>
-        <p className="text-gray-400 text-sm text-center mb-8">PM Air Conditioning Tracker</p>
+    <div className="min-h-screen flex items-center justify-center bg-[var(--app-bg)]">
+      <div className="bg-[var(--panel)] border border-[var(--border)] rounded-xl p-8 w-full max-w-sm shadow-2xl">
+        <h1 className="text-2xl font-bold text-[var(--app-text)] mb-2 text-center">AMC Air Conditioning</h1>
+        <p className="text-[var(--text-muted)] text-sm text-center mb-8">PM Air Conditioning Tracker</p>
 
         <form onSubmit={handleLogin} className="space-y-4">
           <div>
-            <label className="block text-gray-300 text-sm mb-1">Email</label>
+            <label className="block text-[var(--app-text)] text-sm mb-1">Email</label>
             <input
               type="email"
               value={email}
               onChange={e => setEmail(e.target.value)}
               required
-              className="w-full bg-[#0f3460] border border-[#2d3561] text-white rounded-lg px-3 py-2 focus:outline-none focus:border-blue-500"
+              className="w-full bg-[var(--panel-2)] border border-[var(--border)] text-[var(--app-text)] rounded-lg px-3 py-2 focus:outline-none focus:border-blue-500"
               placeholder="user@example.com"
             />
           </div>
           <div>
-            <label className="block text-gray-300 text-sm mb-1">Password</label>
+            <label className="block text-[var(--app-text)] text-sm mb-1">Password</label>
             <input
               type="password"
               value={password}
               onChange={e => setPassword(e.target.value)}
               required
-              className="w-full bg-[#0f3460] border border-[#2d3561] text-white rounded-lg px-3 py-2 focus:outline-none focus:border-blue-500"
+              className="w-full bg-[var(--panel-2)] border border-[var(--border)] text-[var(--app-text)] rounded-lg px-3 py-2 focus:outline-none focus:border-blue-500"
               placeholder="••••••••"
             />
           </div>

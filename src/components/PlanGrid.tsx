@@ -11,6 +11,7 @@ import type {
 } from "ag-grid-community";
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-alpine.css";
+import { useTheme } from "./ThemeProvider";
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -79,6 +80,7 @@ interface Props {
 }
 
 export default function PlanGrid({ year = 2026, isAdmin = false, isLoggedIn = false }: Props) {
+  const { theme } = useTheme();
   const gridRef = useRef<AgGridReact<RowData>>(null);
   const [rowData, setRowData] = useState<RowData[]>([]);
   const [loading, setLoading] = useState(true);
@@ -317,10 +319,10 @@ export default function PlanGrid({ year = 2026, isAdmin = false, isLoggedIn = fa
 
   // ── Render ──────────────────────────────────────────────────────────────────
   return (
-    <div className="flex flex-col h-screen bg-[#0d0d1a] text-white">
+    <div className="flex flex-col h-screen bg-[var(--app-bg)] text-[var(--app-text)]">
       {/* Toolbar */}
-      <div className="flex items-center gap-3 px-4 py-2 bg-[#1a1a2e] border-b border-[#2d3561] flex-shrink-0">
-        <h1 className="text-lg font-bold text-blue-300 mr-2">
+      <div className="flex items-center gap-3 px-4 py-2 bg-[var(--panel)] border-b border-[var(--border)] flex-shrink-0">
+        <h1 className="text-lg font-bold text-blue-400 mr-2">
           🌡️ AC Master Plan {year}
         </h1>
 
@@ -329,7 +331,7 @@ export default function PlanGrid({ year = 2026, isAdmin = false, isLoggedIn = fa
           placeholder="Filter site..."
           value={filterText}
           onChange={e => setFilterText(e.target.value)}
-          className="bg-[#0f3460] border border-[#2d3561] text-white text-sm rounded px-3 py-1 w-48 focus:outline-none focus:border-blue-500"
+          className="bg-[var(--panel-2)] border border-[var(--border)] text-[var(--app-text)] text-sm rounded px-3 py-1 w-48 focus:outline-none focus:border-blue-500"
         />
 
         {isAdmin && (
@@ -372,9 +374,9 @@ export default function PlanGrid({ year = 2026, isAdmin = false, isLoggedIn = fa
       </div>
 
       {/* Grid */}
-      <div className="ag-theme-alpine-dark flex-1 overflow-auto">
+      <div className={`${theme === "light" ? "ag-theme-alpine" : "ag-theme-alpine-dark"} flex-1 overflow-auto`}>
         {loading ? (
-          <div className="flex items-center justify-center h-full text-gray-400">
+          <div className="flex items-center justify-center h-full text-[var(--text-muted)]">
             Loading data...
           </div>
         ) : (
@@ -400,7 +402,7 @@ export default function PlanGrid({ year = 2026, isAdmin = false, isLoggedIn = fa
             }}
             getRowStyle={params =>
               params.data?.id === "__summary__"
-                ? { background: "#0f3460", fontWeight: "bold", borderTop: "2px solid #2d3561" }
+                ? { background: "var(--panel-2)", fontWeight: "bold", borderTop: "2px solid var(--border)" }
                 : undefined
             }
           />
@@ -414,40 +416,40 @@ export default function PlanGrid({ year = 2026, isAdmin = false, isLoggedIn = fa
           onClick={() => setShowAdd(false)}
         >
           <div
-            className="bg-[#1a1a2e] border border-[#2d3561] rounded-lg w-[360px] p-5 shadow-xl"
+            className="bg-[var(--panel)] border border-[var(--border)] rounded-lg w-[360px] p-5 shadow-xl"
             onClick={e => e.stopPropagation()}
           >
-            <h2 className="text-lg font-bold text-blue-300 mb-4">+ เพิ่ม Site ใหม่</h2>
+            <h2 className="text-lg font-bold text-blue-400 mb-4">+ เพิ่ม Site ใหม่</h2>
 
             <div className="space-y-3 text-sm">
               <label className="block">
-                <span className="text-gray-300">ชื่อ Site <span className="text-red-400">*</span></span>
+                <span className="text-[var(--app-text)]">ชื่อ Site <span className="text-red-400">*</span></span>
                 <input
                   autoFocus
                   type="text"
                   value={form.name}
                   onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
                   onKeyDown={e => { if (e.key === "Enter") submitAdd(); }}
-                  className="mt-1 w-full bg-[#0f3460] border border-[#2d3561] text-white rounded px-3 py-1.5 focus:outline-none focus:border-blue-500"
+                  className="mt-1 w-full bg-[var(--panel-2)] border border-[var(--border)] text-[var(--app-text)] rounded px-3 py-1.5 focus:outline-none focus:border-blue-500"
                 />
               </label>
 
               <div className="grid grid-cols-2 gap-3">
                 <label className="block">
-                  <span className="text-gray-300">จำนวนทั้งหมด</span>
+                  <span className="text-[var(--app-text)]">จำนวนทั้งหมด</span>
                   <input
                     type="number"
                     value={form.ac_count}
                     onChange={e => setForm(f => ({ ...f, ac_count: e.target.value }))}
-                    className="mt-1 w-full bg-[#0f3460] border border-[#2d3561] text-white rounded px-3 py-1.5 focus:outline-none focus:border-blue-500"
+                    className="mt-1 w-full bg-[var(--panel-2)] border border-[var(--border)] text-[var(--app-text)] rounded px-3 py-1.5 focus:outline-none focus:border-blue-500"
                   />
                 </label>
                 <label className="block">
-                  <span className="text-gray-300">Type</span>
+                  <span className="text-[var(--app-text)]">Type</span>
                   <select
                     value={form.ac_type}
                     onChange={e => setForm(f => ({ ...f, ac_type: e.target.value }))}
-                    className="mt-1 w-full bg-[#0f3460] border border-[#2d3561] text-white rounded px-3 py-1.5 focus:outline-none focus:border-blue-500"
+                    className="mt-1 w-full bg-[var(--panel-2)] border border-[var(--border)] text-[var(--app-text)] rounded px-3 py-1.5 focus:outline-none focus:border-blue-500"
                   >
                     <option value="Precision">Precision</option>
                     <option value="Comfort">Comfort</option>
@@ -458,14 +460,14 @@ export default function PlanGrid({ year = 2026, isAdmin = false, isLoggedIn = fa
               <div className="grid grid-cols-3 gap-3">
                 {([1, 2, 3] as const).map(n => (
                   <label key={n} className="block">
-                    <span className="text-gray-300">รอบที่ {n}</span>
+                    <span className="text-[var(--app-text)]">รอบที่ {n}</span>
                     <input
                       type="text"
                       value={form[`source_${n}` as "source_1" | "source_2" | "source_3"]}
                       onChange={e =>
                         setForm(f => ({ ...f, [`source_${n}`]: e.target.value }))
                       }
-                      className="mt-1 w-full bg-[#0f3460] border border-[#2d3561] text-white rounded px-2 py-1.5 focus:outline-none focus:border-blue-500"
+                      className="mt-1 w-full bg-[var(--panel-2)] border border-[var(--border)] text-[var(--app-text)] rounded px-2 py-1.5 focus:outline-none focus:border-blue-500"
                     />
                   </label>
                 ))}
@@ -475,7 +477,7 @@ export default function PlanGrid({ year = 2026, isAdmin = false, isLoggedIn = fa
             <div className="flex justify-end gap-2 mt-5">
               <button
                 onClick={() => setShowAdd(false)}
-                className="px-4 py-1.5 text-sm rounded border border-[#2d3561] text-gray-300 hover:bg-[#0f3460]"
+                className="px-4 py-1.5 text-sm rounded border border-[var(--border)] text-[var(--app-text)] hover:bg-[var(--panel-2)]"
               >
                 ยกเลิก
               </button>
