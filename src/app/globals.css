@@ -33,6 +33,8 @@ body {
 .ag-theme-alpine-dark {
   --ag-font-size: 12px;
   --ag-cell-horizontal-padding: 4px;
+  /* vertical separators between columns (each week) */
+  --ag-cell-horizontal-border: solid 1px var(--ag-border-color);
 }
 
 /* Dark grid palette */
