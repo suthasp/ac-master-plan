@@ -28,8 +28,8 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#0d0d1a]">
       <div className="bg-[#1a1a2e] border border-[#2d3561] rounded-xl p-8 w-full max-w-sm shadow-2xl">
-        <h1 className="text-2xl font-bold text-white mb-2 text-center">AC Master Plan</h1>
-        <p className="text-gray-400 text-sm text-center mb-8">Air Conditioning Installation Tracker</p>
+        <h1 className="text-2xl font-bold text-white mb-2 text-center">AMC Air Conditioning</h1>
+        <p className="text-gray-400 text-sm text-center mb-8">PM Air Conditioning Tracker</p>
 
         <form onSubmit={handleLogin} className="space-y-4">
           <div>
