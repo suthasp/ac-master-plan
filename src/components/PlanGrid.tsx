@@ -11,6 +11,7 @@ import type {
 } from "ag-grid-community";
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-alpine.css";
+import * as XLSX from "xlsx";
 import { useTheme } from "./ThemeProvider";
 
 // ── Types ────────────────────────────────────────────────────────────────────
@@ -82,6 +83,7 @@ interface Props {
 export default function PlanGrid({ year = 2026, isAdmin = false, isLoggedIn = false }: Props) {
   const { theme } = useTheme();
   const gridRef = useRef<AgGridReact<RowData>>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [rowData, setRowData] = useState<RowData[]>([]);
   const [loading, setLoading] = useState(true);
   const [filterText, setFilterText] = useState("");
@@ -231,6 +233,80 @@ export default function PlanGrid({ year = 2026, isAdmin = false, isLoggedIn = fa
     gridRef.current?.api.exportDataAsCsv({ fileName: `ac-plan-${year}.csv` });
   }, [year]);
 
+  // ── Import from Excel/CSV (admin) ─────────────────────────────────────────────
+  // Expected columns (same as Export CSV): Site, จำนวนทั้งหมด, Type,
+  // รอบที่ 1/2/3, and numeric week columns 1..52 with P/F/D values.
+  const importExcel = useCallback(async (file: File) => {
+    const norm = (s: string) => String(s).toLowerCase().replace(/\s+/g, " ").trim();
+    try {
+      const buf = await file.arrayBuffer();
+      const wb = XLSX.read(buf);
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      const aoa = XLSX.utils.sheet_to_json<unknown[]>(ws, { header: 1, raw: false, defval: "" });
+      if (aoa.length < 2) { alert("ไฟล์ว่างหรือไม่มีข้อมูล"); return; }
+
+      const headers = (aoa[0] as unknown[]).map(h => String(h).trim());
+      const find = (cands: string[]) => headers.findIndex(h => cands.includes(norm(h)));
+
+      const idxName  = find(["site", "name", "ชื่อ", "ชื่อ site"]);
+      const idxCount = find(["จำนวนทั้งหมด", "ac_count", "# ac", "จำนวน"]);
+      const idxType  = find(["type", "ac_type", "ประเภท"]);
+      const idxS1    = find(["รอบที่ 1", "source_1", "รอบ 1"]);
+      const idxS2    = find(["รอบที่ 2", "source_2", "รอบ 2"]);
+      const idxS3    = find(["รอบที่ 3", "source_3", "รอบ 3"]);
+
+      if (idxName < 0) { alert("ไม่พบคอลัมน์ชื่อ Site (หัวคอลัมน์ต้องมี 'Site')"); return; }
+
+      const weekCols: { idx: number; week: number }[] = [];
+      headers.forEach((h, i) => {
+        const n = Number(h);
+        if (Number.isInteger(n) && n >= 1 && n <= 53) weekCols.push({ idx: i, week: n });
+      });
+
+      const rows = (aoa.slice(1) as unknown[][])
+        .map(r => {
+          const name = String(r[idxName] ?? "").trim();
+          if (!name) return null;
+          const weeks: Record<string, string> = {};
+          weekCols.forEach(({ idx, week }) => {
+            const v = String(r[idx] ?? "").trim();
+            if (v) weeks[week] = v;
+          });
+          return {
+            name,
+            ac_count: idxCount >= 0 ? Number(r[idxCount]) || 0 : 0,
+            ac_type: idxType >= 0 ? String(r[idxType] ?? "").trim() || "Precision" : "Precision",
+            source_1: idxS1 >= 0 ? String(r[idxS1] ?? "").trim() || null : null,
+            source_2: idxS2 >= 0 ? String(r[idxS2] ?? "").trim() || null : null,
+            source_3: idxS3 >= 0 ? String(r[idxS3] ?? "").trim() || null : null,
+            weeks,
+          };
+        })
+        .filter((r): r is NonNullable<typeof r> => r !== null);
+
+      if (rows.length === 0) { alert("ไม่พบข้อมูลที่นำเข้าได้"); return; }
+      if (!confirm(`นำเข้า ${rows.length} site? (เพิ่มต่อจากข้อมูลเดิม)`)) return;
+
+      setSaving(true);
+      const res = await fetch("/api/import", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ year, rows }),
+      });
+      if (!res.ok) {
+        const e = await res.json().catch(() => ({}));
+        throw new Error(e.error || "import failed");
+      }
+      const result = await res.json();
+      alert(`นำเข้าสำเร็จ: ${result.inserted} site, ${result.entries} สถานะ`);
+      await fetchData();
+    } catch (err) {
+      alert("นำเข้าไม่สำเร็จ: " + (err as Error).message);
+    } finally {
+      setSaving(false);
+    }
+  }, [year, fetchData]);
+
   // ── Column definitions ──────────────────────────────────────────────────────
   const columnDefs = useMemo<(ColDef | ColGroupDef)[]>(() => {
     // site fields are editable only for admins (never the SUMMARY row)
@@ -341,6 +417,28 @@ export default function PlanGrid({ year = 2026, isAdmin = false, isLoggedIn = fa
           >
             + Add Site
           </button>
+        )}
+
+        {isAdmin && (
+          <>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".xlsx,.xls,.csv"
+              className="hidden"
+              onChange={e => {
+                const f = e.target.files?.[0];
+                if (f) importExcel(f);
+                e.target.value = "";
+              }}
+            />
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              className="bg-emerald-700 hover:bg-emerald-600 text-white text-sm px-3 py-1 rounded transition-colors"
+            >
+              Import Excel
+            </button>
+          </>
         )}
 
         <button
