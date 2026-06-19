@@ -288,7 +288,7 @@ export default function PlanGrid({ year = 2026, isAdmin = false, isLoggedIn = fa
         .filter((r): r is NonNullable<typeof r> => r !== null);
 
       if (rows.length === 0) { alert("ไม่พบข้อมูลที่นำเข้าได้"); return; }
-      if (!confirm(`นำเข้า ${rows.length} site? (เพิ่มต่อจากข้อมูลเดิม)`)) return;
+      if (!confirm(`นำเข้า ${rows.length} site? (ชื่อซ้ำ = อัปเดตของเดิม, ชื่อใหม่ = เพิ่มเข้าไป)`)) return;
 
       setSaving(true);
       const res = await fetch("/api/import", {
@@ -301,7 +301,7 @@ export default function PlanGrid({ year = 2026, isAdmin = false, isLoggedIn = fa
         throw new Error(e.error || "import failed");
       }
       const result = await res.json();
-      alert(`นำเข้าสำเร็จ: ${result.inserted} site, ${result.entries} สถานะ`);
+      alert(`นำเข้าสำเร็จ: เพิ่มใหม่ ${result.inserted}, อัปเดต ${result.updated} site (${result.entries} สถานะ)`);
       await fetchData();
     } catch (err) {
       alert("นำเข้าไม่สำเร็จ: " + (err as Error).message);

@@ -37,34 +37,59 @@ export async function POST(request: Request) {
   }[] = [];
 
   let inserted = 0;
+  let updated = 0;
+
   for (const row of rows) {
     const trimmedName = String(row.name ?? "").trim();
     if (!trimmedName || trimmedName.toUpperCase() === "SUMMARY") continue;
 
-    const { data: site, error } = await supabase
-      .from("sites")
-      .insert({
-        name: trimmedName,
-        ac_count: Number(row.ac_count) || 0,
-        ac_type: row.ac_type || "Precision",
-        source_1: row.source_1 || null,
-        source_2: row.source_2 || null,
-        source_3: row.source_3 || null,
-      })
-      .select()
-      .single();
+    const fields = {
+      name: trimmedName,
+      ac_count: Number(row.ac_count) || 0,
+      ac_type: row.ac_type || "Precision",
+      source_1: row.source_1 || null,
+      source_2: row.source_2 || null,
+      source_3: row.source_3 || null,
+    };
 
-    if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
+    // upsert by site name
+    const { data: existing } = await supabase
+      .from("sites")
+      .select("id")
+      .eq("name", trimmedName)
+      .limit(1)
+      .maybeSingle();
+
+    let siteId: string;
+    if (existing) {
+      const { error } = await supabase.from("sites").update(fields).eq("id", existing.id);
+      if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+      siteId = existing.id as string;
+
+      // replace this site's weekly status for the year so it matches the file
+      const { error: delErr } = await supabase
+        .from("plan_entries")
+        .delete()
+        .match({ site_id: siteId, year });
+      if (delErr) return NextResponse.json({ error: delErr.message }, { status: 500 });
+      updated++;
+    } else {
+      const { data: site, error } = await supabase
+        .from("sites")
+        .insert(fields)
+        .select()
+        .single();
+      if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+      siteId = site.id as string;
+      inserted++;
     }
-    inserted++;
 
     if (row.weeks) {
       for (const [wk, raw] of Object.entries(row.weeks)) {
         const status = String(raw).trim().toUpperCase();
         const week_number = Number(wk);
         if (VALID_STATUS.has(status) && week_number >= 1 && week_number <= 53) {
-          entriesPayload.push({ site_id: site.id, year, week_number, status });
+          entriesPayload.push({ site_id: siteId, year, week_number, status });
         }
       }
     }
@@ -75,5 +100,5 @@ export async function POST(request: Request) {
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
-  return NextResponse.json({ inserted, entries: entriesPayload.length });
+  return NextResponse.json({ inserted, updated, entries: entriesPayload.length });
 }
