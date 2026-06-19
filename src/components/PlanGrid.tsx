@@ -230,7 +230,10 @@ export default function PlanGrid({ year = 2026, isAdmin = false, isLoggedIn = fa
 
   // ── Export ──────────────────────────────────────────────────────────────────
   const exportCsv = useCallback(() => {
-    gridRef.current?.api.exportDataAsCsv({ fileName: `ac-plan-${year}.csv` });
+    gridRef.current?.api.exportDataAsCsv({
+      fileName: `ac-plan-${year}.csv`,
+      skipPinnedBottom: true, // exclude the computed SUMMARY row
+    });
   }, [year]);
 
   // ── Import from Excel/CSV (admin) ─────────────────────────────────────────────
@@ -266,7 +269,7 @@ export default function PlanGrid({ year = 2026, isAdmin = false, isLoggedIn = fa
       const rows = (aoa.slice(1) as unknown[][])
         .map(r => {
           const name = String(r[idxName] ?? "").trim();
-          if (!name) return null;
+          if (!name || name.toUpperCase() === "SUMMARY") return null;
           const weeks: Record<string, string> = {};
           weekCols.forEach(({ idx, week }) => {
             const v = String(r[idx] ?? "").trim();

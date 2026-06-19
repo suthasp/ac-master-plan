@@ -38,12 +38,13 @@ export async function POST(request: Request) {
 
   let inserted = 0;
   for (const row of rows) {
-    if (!row.name || !String(row.name).trim()) continue;
+    const trimmedName = String(row.name ?? "").trim();
+    if (!trimmedName || trimmedName.toUpperCase() === "SUMMARY") continue;
 
     const { data: site, error } = await supabase
       .from("sites")
       .insert({
-        name: String(row.name).trim(),
+        name: trimmedName,
         ac_count: Number(row.ac_count) || 0,
         ac_type: row.ac_type || "Precision",
         source_1: row.source_1 || null,
