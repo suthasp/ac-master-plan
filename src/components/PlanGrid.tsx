@@ -38,11 +38,11 @@ interface RowData extends Site {
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
 const MONTHS = [
-  { name: "Jan", weeks: [1, 2, 3, 4] },
-  { name: "Feb", weeks: [5, 6, 7, 8] },
-  { name: "Mar", weeks: [9, 10, 11, 12, 13] },
-  { name: "Apr", weeks: [14, 15, 16, 17] },
-  { name: "May", weeks: [18, 19, 20, 21, 22] },
+  { name: "Jan", weeks: [1, 2, 3, 4, 5] },
+  { name: "Feb", weeks: [6, 7, 8, 9] },
+  { name: "Mar", weeks: [10, 11, 12, 13] },
+  { name: "Apr", weeks: [14, 15, 16, 17, 18] },
+  { name: "May", weeks: [19, 20, 21, 22] },
   { name: "Jun", weeks: [23, 24, 25, 26, 27] },
   { name: "Jul", weeks: [28, 29, 30, 31] },
   { name: "Aug", weeks: [32, 33, 34, 35] },
