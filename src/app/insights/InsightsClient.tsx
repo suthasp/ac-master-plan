@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import {
   ResponsiveContainer,
   PieChart, Pie, Cell, Tooltip, Legend,
-  BarChart, Bar, XAxis, YAxis, CartesianGrid,
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, LabelList,
 } from "recharts";
 import { createClient } from "@/lib/supabase/client";
 import ThemeToggle from "@/components/ThemeToggle";
@@ -203,6 +203,7 @@ export default function InsightsClient({
                     <Tooltip {...tooltipProps} />
                     <Bar dataKey="ทำแล้ว" radius={[4, 4, 0, 0]}>
                       {m.allRounds.map((_, i) => <Cell key={i} fill={ROUND_COLORS[i]} />)}
+                      <LabelList dataKey="ทำแล้ว" position="top" fill="var(--app-text)" fontSize={11} />
                     </Bar>
                   </BarChart>
                 </ResponsiveContainer>
@@ -220,8 +221,12 @@ export default function InsightsClient({
                     <YAxis tick={{ fill: axisColor, fontSize: 11 }} allowDecimals={false} />
                     <Tooltip {...tooltipProps} />
                     <Legend />
-                    <Bar dataKey="ทั้งหมด" fill={REMAIN_COLOR} radius={[4, 4, 0, 0]} />
-                    <Bar dataKey="ทำแล้ว" fill={DONE_COLOR} radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="ทั้งหมด" fill={REMAIN_COLOR} radius={[4, 4, 0, 0]}>
+                      <LabelList dataKey="ทั้งหมด" position="top" fill="var(--app-text)" fontSize={11} />
+                    </Bar>
+                    <Bar dataKey="ทำแล้ว" fill={DONE_COLOR} radius={[4, 4, 0, 0]}>
+                      <LabelList dataKey="ทำแล้ว" position="top" fill="var(--app-text)" fontSize={11} />
+                    </Bar>
                   </BarChart>
                 </ResponsiveContainer>
               </div>
@@ -234,8 +239,12 @@ export default function InsightsClient({
                     <YAxis tick={{ fill: axisColor, fontSize: 11 }} allowDecimals={false} />
                     <Tooltip {...tooltipProps} />
                     <Legend />
-                    <Bar dataKey="ทั้งหมด" fill={REMAIN_COLOR} radius={[4, 4, 0, 0]} />
-                    <Bar dataKey="ทำแล้ว" fill={DONE_COLOR} radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="ทั้งหมด" fill={REMAIN_COLOR} radius={[4, 4, 0, 0]}>
+                      <LabelList dataKey="ทั้งหมด" position="top" fill="var(--app-text)" fontSize={11} />
+                    </Bar>
+                    <Bar dataKey="ทำแล้ว" fill={DONE_COLOR} radius={[4, 4, 0, 0]}>
+                      <LabelList dataKey="ทำแล้ว" position="top" fill="var(--app-text)" fontSize={11} />
+                    </Bar>
                   </BarChart>
                 </ResponsiveContainer>
               </div>
