@@ -39,6 +39,17 @@ interface RowData extends Site {
   [key: string]: unknown; // week columns like "wk_1", "wk_2" ...
 }
 
+interface ImportSiteRow {
+  name: string;
+  ac_count: number;
+  ac_type: string;
+  site_type: string | null;
+  source_1: string | null;
+  source_2: string | null;
+  source_3: string | null;
+  weeks: Record<string, string>;
+}
+
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
 const MONTHS = [
@@ -96,6 +107,9 @@ export default function PlanGrid({ year = 2026, isAdmin = false, isLoggedIn = fa
   const emptyForm = { name: "", ac_count: "", ac_type: "Precision", site_type: "Big", source_1: "", source_2: "", source_3: "" };
   const [showAdd, setShowAdd] = useState(false);
   const [form, setForm] = useState(emptyForm);
+
+  // ── Import confirmation ───────────────────────────────────────────────────────
+  const [pendingImport, setPendingImport] = useState<ImportSiteRow[] | null>(null);
 
   // ── Fetch data ──────────────────────────────────────────────────────────────
   const fetchData = useCallback(async () => {
@@ -434,27 +448,36 @@ export default function PlanGrid({ year = 2026, isAdmin = false, isLoggedIn = fa
         .filter((r): r is NonNullable<typeof r> => r !== null);
 
       if (rows.length === 0) { alert("ไม่พบข้อมูลที่นำเข้าได้"); return; }
-      if (!confirm(`นำเข้า ${rows.length} site? (ชื่อซ้ำ = อัปเดตของเดิม, ชื่อใหม่ = เพิ่มเข้าไป)`)) return;
+      setPendingImport(rows); // open styled confirmation modal
+    } catch (err) {
+      alert("อ่านไฟล์ไม่สำเร็จ: " + (err as Error).message);
+    }
+  }, []);
 
-      setSaving(true);
+  // confirm + run the import
+  const doImport = useCallback(async () => {
+    if (!pendingImport) return;
+    setSaving(true);
+    try {
       const res = await fetch("/api/import", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ year, rows }),
+        body: JSON.stringify({ year, rows: pendingImport }),
       });
       if (!res.ok) {
         const e = await res.json().catch(() => ({}));
         throw new Error(e.error || "import failed");
       }
       const result = await res.json();
-      alert(`นำเข้าสำเร็จ: เพิ่มใหม่ ${result.inserted}, อัปเดต ${result.updated} site (${result.entries} สถานะ)`);
+      setPendingImport(null);
       await fetchData();
+      alert(`นำเข้าสำเร็จ: เพิ่มใหม่ ${result.inserted}, อัปเดต ${result.updated} site (${result.entries} สถานะ)`);
     } catch (err) {
       alert("นำเข้าไม่สำเร็จ: " + (err as Error).message);
     } finally {
       setSaving(false);
     }
-  }, [year, fetchData]);
+  }, [pendingImport, year, fetchData]);
 
   // ── Column definitions ──────────────────────────────────────────────────────
   const columnDefs = useMemo<(ColDef | ColGroupDef)[]>(() => {
@@ -723,6 +746,58 @@ export default function PlanGrid({ year = 2026, isAdmin = false, isLoggedIn = fa
                 className="px-4 py-1.5 text-sm rounded bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-50"
               >
                 {saving ? "กำลังบันทึก..." : "บันทึก"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Import confirmation modal */}
+      {pendingImport && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60"
+          onClick={() => !saving && setPendingImport(null)}
+        >
+          <div
+            className="bg-[var(--panel)] border border-[var(--border)] rounded-lg w-[400px] p-5 shadow-xl"
+            onClick={e => e.stopPropagation()}
+          >
+            <h2 className="text-lg font-bold text-blue-400 mb-1">ยืนยันการนำเข้า</h2>
+            <p className="text-sm text-[var(--app-text)] mb-1">
+              พบ <span className="font-bold text-blue-400">{pendingImport.length}</span> site ในไฟล์
+            </p>
+            <p className="text-xs text-[var(--text-muted)] mb-3">
+              ชื่อซ้ำ = อัปเดตของเดิม · ชื่อใหม่ = เพิ่มเข้าไป
+            </p>
+
+            <div className="max-h-44 overflow-auto rounded border border-[var(--border)] bg-[var(--panel-2)] text-sm">
+              {pendingImport.map((r, i) => (
+                <div
+                  key={i}
+                  className="flex justify-between px-3 py-1 border-b border-[var(--border)] last:border-0"
+                >
+                  <span className="text-[var(--app-text)]">{r.name}</span>
+                  <span className="text-[var(--text-muted)] text-xs">
+                    {r.ac_count} · {r.ac_type}{r.site_type ? ` · ${r.site_type}` : ""}
+                  </span>
+                </div>
+              ))}
+            </div>
+
+            <div className="flex justify-end gap-2 mt-5">
+              <button
+                onClick={() => setPendingImport(null)}
+                disabled={saving}
+                className="px-4 py-1.5 text-sm rounded border border-[var(--border)] text-[var(--app-text)] hover:bg-[var(--panel-2)] disabled:opacity-50"
+              >
+                ยกเลิก
+              </button>
+              <button
+                onClick={doImport}
+                disabled={saving}
+                className="px-4 py-1.5 text-sm rounded bg-emerald-700 hover:bg-emerald-600 text-white disabled:opacity-50"
+              >
+                {saving ? "กำลังนำเข้า..." : "นำเข้า"}
               </button>
             </div>
           </div>
