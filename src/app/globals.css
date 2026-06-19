@@ -85,6 +85,11 @@ body {
   background-color: rgba(250, 204, 21, 0.15) !important;
 }
 
+/* status color must win over the current-week highlight (higher specificity) */
+.cell-current-week.cell-planned  { background-color: #d1d5db !important; }
+.cell-current-week.cell-finished { background-color: #22c55e !important; }
+.cell-current-week.cell-delayed  { background-color: #ef4444 !important; }
+
 .ag-header-cell.current-week-header {
   background-color: rgba(250, 204, 21, 0.3) !important;
 }
