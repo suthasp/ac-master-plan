@@ -542,6 +542,14 @@ export default function PlanGrid({ year = 2026, isAdmin = false, isLoggedIn = fa
 
   const getRowId = useCallback((p: GetRowIdParams<RowData>) => p.data.id as string, []);
 
+  // duplicate site names in the pending import (upsert will merge them)
+  const importDupNames = (() => {
+    if (!pendingImport) return [] as string[];
+    const counts: Record<string, number> = {};
+    pendingImport.forEach(r => { counts[r.name] = (counts[r.name] ?? 0) + 1; });
+    return Object.keys(counts).filter(n => counts[n] > 1);
+  })();
+
   // ── Render ──────────────────────────────────────────────────────────────────
   return (
     <div className="flex flex-col h-screen bg-[var(--app-bg)] text-[var(--app-text)]">
@@ -769,6 +777,12 @@ export default function PlanGrid({ year = 2026, isAdmin = false, isLoggedIn = fa
             <p className="text-xs text-[var(--text-muted)] mb-3">
               ชื่อซ้ำ = อัปเดตของเดิม · ชื่อใหม่ = เพิ่มเข้าไป
             </p>
+
+            {importDupNames.length > 0 && (
+              <p className="text-xs text-amber-500 bg-amber-500/10 border border-amber-500/40 rounded px-2 py-1.5 mb-3">
+                ⚠️ พบชื่อซ้ำในไฟล์ ({importDupNames.join(", ")}) — แถวที่ชื่อเหมือนกันจะถูกรวมเป็น site เดียว (ค่าจากแถวล่างสุดมีผล) แนะนำให้ตั้งชื่อไม่ซ้ำกัน
+              </p>
+            )}
 
             <div className="max-h-44 overflow-auto rounded border border-[var(--border)] bg-[var(--panel-2)] text-sm">
               {pendingImport.map((r, i) => (

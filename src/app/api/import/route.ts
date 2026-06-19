@@ -30,12 +30,12 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "No rows to import" }, { status: 400 });
   }
 
-  const entriesPayload: {
-    site_id: string;
-    year: number;
-    week_number: number;
-    status: string;
-  }[] = [];
+  // keyed by `${site_id}_${week_number}` so duplicate rows/weeks can't collide
+  // with the plan_entries unique constraint (last value wins)
+  const entriesMap = new Map<
+    string,
+    { site_id: string; year: number; week_number: number; status: string }
+  >();
 
   let inserted = 0;
   let updated = 0;
@@ -91,12 +91,13 @@ export async function POST(request: Request) {
         const status = String(raw).trim().toUpperCase();
         const week_number = Number(wk);
         if (VALID_STATUS.has(status) && week_number >= 1 && week_number <= 53) {
-          entriesPayload.push({ site_id: siteId, year, week_number, status });
+          entriesMap.set(`${siteId}_${week_number}`, { site_id: siteId, year, week_number, status });
         }
       }
     }
   }
 
+  const entriesPayload = Array.from(entriesMap.values());
   if (entriesPayload.length) {
     const { error } = await supabase.from("plan_entries").insert(entriesPayload);
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
