@@ -559,7 +559,7 @@ export default function PlanGrid({ year = 2026, isAdmin = false, isLoggedIn = fa
 
   // ── Render ──────────────────────────────────────────────────────────────────
   return (
-    <div className="flex flex-col h-screen bg-[var(--app-bg)] text-[var(--app-text)]">
+    <div className="flex flex-col h-full bg-[var(--app-bg)] text-[var(--app-text)]">
       {/* Toolbar */}
       <div className="flex items-center gap-3 px-4 py-2 bg-[var(--panel)] border-b border-[var(--border)] flex-shrink-0">
         <h1 className="text-lg font-bold text-blue-400 mr-2">
@@ -636,7 +636,7 @@ export default function PlanGrid({ year = 2026, isAdmin = false, isLoggedIn = fa
       </div>
 
       {/* Grid */}
-      <div className={`${theme === "light" ? "ag-theme-alpine" : "ag-theme-alpine-dark"} flex-1 overflow-auto`}>
+      <div className={`${theme === "light" ? "ag-theme-alpine" : "ag-theme-alpine-dark"} flex-1 min-h-0`}>
         {loading ? (
           <div className="flex items-center justify-center h-full text-[var(--text-muted)]">
             Loading data...
@@ -644,7 +644,6 @@ export default function PlanGrid({ year = 2026, isAdmin = false, isLoggedIn = fa
         ) : (
           <AgGridReact<RowData>
             ref={gridRef}
-            domLayout="autoHeight"
             rowData={rowData}
             columnDefs={columnDefs}
             pinnedBottomRowData={pinnedBottomRowData}
