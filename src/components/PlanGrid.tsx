@@ -74,7 +74,7 @@ function getCurrentWeek(): number {
   return Math.ceil((diff / 86400000 + start.getDay() + 1) / 7);
 }
 
-const STATUS_CYCLE: Record<string, string> = { "": "P", P: "F", F: "D", D: "" };
+const STATUS_CYCLE: Record<string, string> = { "": "P", P: "F", F: "" };
 
 function cellClass(status: string, week: number, currentWeek: number) {
   const classes: string[] = [];
@@ -625,10 +625,6 @@ export default function PlanGrid({ year = 2026, isAdmin = false, isLoggedIn = fa
           <span className="flex items-center gap-1">
             <span className="inline-block w-5 h-5 bg-green-500 text-black font-bold flex items-center justify-center rounded-sm">F</span>
             Finished
-          </span>
-          <span className="flex items-center gap-1">
-            <span className="inline-block w-5 h-5 bg-red-500 text-white font-bold flex items-center justify-center rounded-sm">D</span>
-            Delayed
           </span>
           <span className="flex items-center gap-1">
             <span className="inline-block w-5 h-5 bg-blue-400/30 border border-blue-400 rounded-sm"></span>

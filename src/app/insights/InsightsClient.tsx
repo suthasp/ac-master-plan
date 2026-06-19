@@ -74,15 +74,12 @@ export default function InsightsClient({
     const totalAC = sites.reduce((s, r) => s + (Number(r.ac_count) || 0), 0);
     const P = entries.filter(e => e.status === "P").length;
     const F = entries.filter(e => e.status === "F").length;
-    const D = entries.filter(e => e.status === "D").length;
-    const scheduled = P + F + D;
+    const scheduled = P + F;
     const pctComplete = scheduled ? Math.round((F / scheduled) * 100) : 0;
-    const pctDelayed = scheduled ? Math.round((D / scheduled) * 100) : 0;
 
     const statusData = [
       { name: "Planned", value: P, color: COLORS.P },
       { name: "Finished", value: F, color: COLORS.F },
-      { name: "Delayed", value: D, color: COLORS.D },
     ].filter(d => d.value > 0);
 
     const byMonth = MONTHS.map(month => {
@@ -92,7 +89,6 @@ export default function InsightsClient({
         name: month.name,
         Planned: inMonth.filter(e => e.status === "P").length,
         Finished: inMonth.filter(e => e.status === "F").length,
-        Delayed: inMonth.filter(e => e.status === "D").length,
       };
     });
 
@@ -105,7 +101,7 @@ export default function InsightsClient({
       AC: sites.filter(s => s.ac_type === t).reduce((a, s) => a + (Number(s.ac_count) || 0), 0),
     }));
 
-    return { totalSites, totalAC, pctComplete, pctDelayed, statusData, byMonth, acBySiteType, acByType };
+    return { totalSites, totalAC, pctComplete, statusData, byMonth, acBySiteType, acByType };
   }, [sites, entries]);
 
   const axisColor = "#94a3b8";
@@ -144,7 +140,7 @@ export default function InsightsClient({
         ) : (
           <div className="space-y-6">
             {/* metric cards */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
               <div className={card}>
                 <div className="text-[var(--text-muted)] text-sm mb-1">จำนวน Site</div>
                 <div className="text-3xl font-bold">{m.totalSites}</div>
@@ -156,10 +152,6 @@ export default function InsightsClient({
               <div className={card}>
                 <div className="text-green-500 text-sm font-semibold mb-1">Percent Complete</div>
                 <div className="text-3xl font-bold text-green-500">{m.pctComplete}<span className="text-lg">%</span></div>
-              </div>
-              <div className={card}>
-                <div className="text-red-500 text-sm font-semibold mb-1">Delayed</div>
-                <div className="text-3xl font-bold text-red-500">{m.pctDelayed}<span className="text-lg">%</span></div>
               </div>
             </div>
 
@@ -193,7 +185,6 @@ export default function InsightsClient({
                     <Legend />
                     <Bar dataKey="Planned" fill={COLORS.P} stackId="a" />
                     <Bar dataKey="Finished" fill={COLORS.F} stackId="a" />
-                    <Bar dataKey="Delayed" fill={COLORS.D} stackId="a" />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
