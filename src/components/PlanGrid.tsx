@@ -319,7 +319,7 @@ export default function PlanGrid({ year = 2026, isAdmin = false, isLoggedIn = fa
         const c = ws.getCell(3, cur);
         c.value = w;
         styleHeader(c);
-        if (w === currentWeek) c.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFCA8A04" } };
+        if (w === currentWeek) c.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FF3B82F6" } };
         cur++;
       });
       ws.mergeCells(2, start, 2, cur - 1);
@@ -635,7 +635,7 @@ export default function PlanGrid({ year = 2026, isAdmin = false, isLoggedIn = fa
             Delayed
           </span>
           <span className="flex items-center gap-1">
-            <span className="inline-block w-5 h-5 bg-yellow-400/30 border border-yellow-400 rounded-sm"></span>
+            <span className="inline-block w-5 h-5 bg-blue-400/30 border border-blue-400 rounded-sm"></span>
             Current Wk
           </span>
         </div>

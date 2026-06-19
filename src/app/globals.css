@@ -82,7 +82,7 @@ body {
 }
 
 .cell-current-week {
-  background-color: rgba(250, 204, 21, 0.15) !important;
+  background-color: rgba(59, 130, 246, 0.18) !important;
 }
 
 /* status color must win over the current-week highlight (higher specificity) */
@@ -91,7 +91,7 @@ body {
 .cell-current-week.cell-delayed  { background-color: #ef4444 !important; }
 
 .ag-header-cell.current-week-header {
-  background-color: rgba(250, 204, 21, 0.3) !important;
+  background-color: rgba(59, 130, 246, 0.35) !important;
 }
 
 /* Week-number column headers: centered, compact */
