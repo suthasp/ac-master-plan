@@ -531,14 +531,14 @@ export default function PlanGrid({ year = 2026, isAdmin = false, isLoggedIn = fa
     const monthGroups: ColGroupDef[] = MONTHS.map(month => ({
       headerName: month.name,
       headerClass: "text-center font-bold",
-      children: month.weeks.map(w => ({
+      children: month.weeks.map((w, wi) => ({
         field: `wk_${w}`,
         headerName: `${w}`,
         width: 38,
-        headerClass: ["wk-header", w === currentWeek ? "current-week-header" : ""],
+        headerClass: ["wk-header", w === currentWeek ? "current-week-header" : "", wi === 0 ? "month-start" : ""],
         cellStyle: { padding: "0", textAlign: "center", fontSize: "11px" },
         cellClass: (params: { value: string }) =>
-          cellClass(params.value, w, currentWeek),
+          cellClass(params.value, w, currentWeek) + (wi === 0 ? " month-start" : ""),
         suppressMenu: true,
         sortable: false,
       } as ColDef)),

@@ -34,7 +34,13 @@ body {
   --ag-font-size: 12px;
   --ag-cell-horizontal-padding: 4px;
   /* vertical separators between columns (each week) */
-  --ag-cell-horizontal-border: solid 1px var(--ag-border-color);
+  --ag-cell-horizontal-border: solid 1px rgba(148, 163, 184, 0.25);
+}
+
+/* thicker divider at the start of each month (cells + headers) */
+.ag-theme-alpine .month-start,
+.ag-theme-alpine-dark .month-start {
+  border-left: 2px solid rgba(148, 163, 184, 0.85) !important;
 }
 
 /* Dark grid palette */
