@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { Fragment, useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   ResponsiveContainer,
@@ -94,8 +94,61 @@ export default function InsightsClient({
     };
   }, [sites, round]);
 
+  // per-site PM progress summary: Site Type → prefix group → rows (PAC/Comfort %)
+  const summary = useMemo(() => {
+    const field = `source_${round}` as "source_1" | "source_2" | "source_3";
+    const pctOf = (s: Site) => {
+      const total = Number(s.ac_count) || 0;
+      return total ? Math.round(((Number(s[field]) || 0) / total) * 100) : 0;
+    };
+
+    type Row = { name: string; pac: number | null; comfort: number | null };
+    const byType = new Map<string, Map<string, Row>>();
+    for (const s of sites) {
+      const st = s.site_type || "Other";
+      if (!byType.has(st)) byType.set(st, new Map());
+      const grp = byType.get(st)!;
+      if (!grp.has(s.name)) grp.set(s.name, { name: s.name, pac: null, comfort: null });
+      const row = grp.get(s.name)!;
+      if (s.ac_type === "Comfort") row.comfort = pctOf(s);
+      else row.pac = pctOf(s);
+    }
+
+    const typeOrder = ["Big", "Medium"];
+    const types = Array.from(byType.keys()).sort(
+      (a, b) => (typeOrder.indexOf(a) + 1 || 99) - (typeOrder.indexOf(b) + 1 || 99)
+    );
+
+    return types.map(t => {
+      const rows = Array.from(byType.get(t)!.values());
+      const groups = new Map<string, Row[]>();
+      for (const r of rows) {
+        const pre = r.name.split("-")[0] || "อื่น ๆ";
+        if (!groups.has(pre)) groups.set(pre, []);
+        groups.get(pre)!.push(r);
+      }
+      const groupArr = Array.from(groups.entries())
+        .sort((a, b) => a[0].localeCompare(b[0]))
+        .map(([prefix, rs]) => ({ prefix, rows: rs.sort((a, b) => a.name.localeCompare(b.name)) }));
+      return { siteType: t, groups: groupArr };
+    });
+  }, [sites, round]);
+
   const axisColor = "#94a3b8";
   const card = "bg-[var(--panel)] border border-[var(--border)] rounded-xl p-5";
+
+  // heatmap colors for the per-site progress table
+  const pacStyle = (pct: number | null): React.CSSProperties =>
+    pct === null ? { background: "#9ca3af", color: "#fff" }
+    : pct >= 100 ? { background: "#6aa84f", color: "#fff" }
+    : pct <= 0 ? { background: "#fff7d6", color: "#333" }
+    : { background: "#ffffff", color: "#111" };
+  const comfortStyle = (pct: number | null): React.CSSProperties =>
+    pct === null ? { background: "#9ca3af", color: "#fff" }
+    : pct >= 100 ? { background: "#3b6fb5", color: "#fff" }
+    : pct <= 0 ? { background: "#dbe7f3", color: "#555" }
+    : { background: "#ffffff", color: "#111" };
+  const fmtPct = (pct: number | null) => (pct === null ? "" : `${pct}%`);
 
   // value + percent label centered inside each donut segment
   const donutLabel = (p: {
@@ -265,6 +318,45 @@ export default function InsightsClient({
                     </Bar>
                   </BarChart>
                 </ResponsiveContainer>
+              </div>
+            </div>
+
+            {/* per-site PM progress detail */}
+            <div className={card}>
+              <h2 className="font-semibold mb-4">
+                AMC PM Air – สรุป PM Progress {round}/2026 (รายละเอียดทุก Site)
+              </h2>
+              <div className="grid lg:grid-cols-3 gap-4">
+                {summary.map(sec => (
+                  <div key={sec.siteType} className="border border-[var(--border)] rounded-lg overflow-hidden self-start">
+                    <div className="bg-blue-800 text-white text-center font-semibold py-1 text-sm">◆ {sec.siteType}</div>
+                    <table className="w-full text-xs border-collapse">
+                      <thead>
+                        <tr className="bg-blue-600 text-white">
+                          <th className="text-left px-2 py-1">Site</th>
+                          <th className="px-2 py-1">PAC {round}/2026</th>
+                          <th className="px-2 py-1">Comfort {round}/2026</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {sec.groups.map(g => (
+                          <Fragment key={g.prefix}>
+                            <tr>
+                              <td colSpan={3} className="text-center text-[var(--text-muted)] bg-[var(--panel-2)] py-0.5">— {g.prefix} —</td>
+                            </tr>
+                            {g.rows.map(r => (
+                              <tr key={r.name} className="border-t border-[var(--border)]">
+                                <td className="px-2 py-1 text-[var(--app-text)] whitespace-nowrap">{r.name}</td>
+                                <td className="text-center py-1 font-semibold" style={pacStyle(r.pac)}>{fmtPct(r.pac)}</td>
+                                <td className="text-center py-1 font-semibold" style={comfortStyle(r.comfort)}>{fmtPct(r.comfort)}</td>
+                              </tr>
+                            ))}
+                          </Fragment>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                ))}
               </div>
             </div>
           </div>
