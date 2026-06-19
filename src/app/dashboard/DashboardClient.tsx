@@ -29,6 +29,7 @@ export default function DashboardClient({
       {/* Top bar */}
       <div className="flex items-center justify-between px-4 py-1 bg-[var(--panel-2)] border-b border-[var(--border)] text-sm flex-shrink-0">
         <div className="flex items-center gap-4">
+          <span className="font-bold text-blue-400">❄️ AC Master Plan 2026 (AMC)</span>
           <span className="text-blue-400 font-semibold">Plan</span>
           <button
             onClick={() => router.push("/insights")}

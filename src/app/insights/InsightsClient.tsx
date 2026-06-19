@@ -114,7 +114,7 @@ export default function InsightsClient({
       {/* Top bar */}
       <div className="flex items-center justify-between px-4 py-2 bg-[var(--panel-2)] border-b border-[var(--border)] text-sm">
         <div className="flex items-center gap-4">
-          <span className="font-bold text-blue-400">❄️ AC Master Plan (AMC)</span>
+          <span className="font-bold text-blue-400">❄️ AC Master Plan 2026 (AMC)</span>
           <button onClick={() => router.push("/dashboard")} className="text-[var(--text-muted)] hover:text-blue-400">Plan</button>
           <span className="text-blue-400 font-semibold">Insights</span>
         </div>

@@ -568,10 +568,6 @@ export default function PlanGrid({ year = 2026, isAdmin = false, isLoggedIn = fa
     <div className="flex flex-col h-full bg-[var(--app-bg)] text-[var(--app-text)]">
       {/* Toolbar */}
       <div className="flex items-center gap-3 px-4 py-2 bg-[var(--panel)] border-b border-[var(--border)] flex-shrink-0">
-        <h1 className="text-lg font-bold text-blue-400 mr-2">
-          ❄️ AC Master Plan {year} (AMC)
-        </h1>
-
         <input
           type="text"
           placeholder="Filter site..."
