@@ -96,6 +96,16 @@ export default function InsightsClient({
 
   const axisColor = "#94a3b8";
   const card = "bg-[var(--panel)] border border-[var(--border)] rounded-xl p-5";
+  const tooltipProps = {
+    cursor: false,
+    contentStyle: {
+      backgroundColor: "var(--panel)",
+      border: "1px solid var(--border)",
+      borderRadius: "8px",
+    },
+    labelStyle: { color: "var(--app-text)", fontWeight: 600 },
+    itemStyle: { color: "var(--app-text)" },
+  };
 
   return (
     <div className="min-h-screen bg-[var(--app-bg)] text-[var(--app-text)]">
@@ -176,7 +186,7 @@ export default function InsightsClient({
                       <Pie data={m.donut} dataKey="value" nameKey="name" innerRadius={60} outerRadius={100} paddingAngle={2}>
                         {m.donut.map((d, i) => <Cell key={i} fill={d.color} />)}
                       </Pie>
-                      <Tooltip cursor={false} />
+                      <Tooltip {...tooltipProps} />
                       <Legend />
                     </PieChart>
                   </ResponsiveContainer>
@@ -190,7 +200,7 @@ export default function InsightsClient({
                     <CartesianGrid strokeDasharray="3 3" stroke="rgba(148,163,184,0.2)" />
                     <XAxis dataKey="name" tick={{ fill: axisColor, fontSize: 12 }} />
                     <YAxis tick={{ fill: axisColor, fontSize: 11 }} allowDecimals={false} />
-                    <Tooltip cursor={false} />
+                    <Tooltip {...tooltipProps} />
                     <Bar dataKey="ทำแล้ว" radius={[4, 4, 0, 0]}>
                       {m.allRounds.map((_, i) => <Cell key={i} fill={ROUND_COLORS[i]} />)}
                     </Bar>
@@ -208,7 +218,7 @@ export default function InsightsClient({
                     <CartesianGrid strokeDasharray="3 3" stroke="rgba(148,163,184,0.2)" />
                     <XAxis dataKey="name" tick={{ fill: axisColor, fontSize: 12 }} />
                     <YAxis tick={{ fill: axisColor, fontSize: 11 }} allowDecimals={false} />
-                    <Tooltip cursor={false} />
+                    <Tooltip {...tooltipProps} />
                     <Legend />
                     <Bar dataKey="ทั้งหมด" fill={REMAIN_COLOR} radius={[4, 4, 0, 0]} />
                     <Bar dataKey="ทำแล้ว" fill={DONE_COLOR} radius={[4, 4, 0, 0]} />
@@ -222,7 +232,7 @@ export default function InsightsClient({
                     <CartesianGrid strokeDasharray="3 3" stroke="rgba(148,163,184,0.2)" />
                     <XAxis dataKey="name" tick={{ fill: axisColor, fontSize: 12 }} />
                     <YAxis tick={{ fill: axisColor, fontSize: 11 }} allowDecimals={false} />
-                    <Tooltip cursor={false} />
+                    <Tooltip {...tooltipProps} />
                     <Legend />
                     <Bar dataKey="ทั้งหมด" fill={REMAIN_COLOR} radius={[4, 4, 0, 0]} />
                     <Bar dataKey="ทำแล้ว" fill={DONE_COLOR} radius={[4, 4, 0, 0]} />
