@@ -17,7 +17,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="th" className={notoSansThai.variable}>
-      <body className="min-h-screen bg-[#0d0d1a]">{children}</body>
+      <body className={`${notoSansThai.className} min-h-screen bg-[#0d0d1a]`}>{children}</body>
     </html>
   );
 }

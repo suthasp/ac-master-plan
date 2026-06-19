@@ -22,6 +22,10 @@ body {
   font-family: var(--font-noto-thai), 'Segoe UI', sans-serif;
 }
 
+.ag-theme-alpine-dark {
+  --ag-font-family: var(--font-noto-thai), 'Segoe UI', sans-serif;
+}
+
 .ag-theme-alpine-dark .ag-header-group-cell {
   font-weight: 700;
   text-align: center;
