@@ -111,6 +111,13 @@ export default function PlanGrid({ year = 2026, isAdmin = false, isLoggedIn = fa
   // ── Import confirmation ───────────────────────────────────────────────────────
   const [pendingImport, setPendingImport] = useState<ImportSiteRow[] | null>(null);
 
+  // ── Toast notifications ───────────────────────────────────────────────────────
+  const [toast, setToast] = useState<{ type: "success" | "error"; msg: string } | null>(null);
+  const showToast = useCallback((type: "success" | "error", msg: string) => {
+    setToast({ type, msg });
+    setTimeout(() => setToast(null), 4000);
+  }, []);
+
   // ── Fetch data ──────────────────────────────────────────────────────────────
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -398,13 +405,13 @@ export default function PlanGrid({ year = 2026, isAdmin = false, isLoggedIn = fa
       const wb = XLSX.read(buf);
       const ws = wb.Sheets[wb.SheetNames[0]];
       const aoa = XLSX.utils.sheet_to_json<unknown[]>(ws, { header: 1, raw: false, defval: "" });
-      if (aoa.length < 2) { alert("ไฟล์ว่างหรือไม่มีข้อมูล"); return; }
+      if (aoa.length < 2) { showToast("error", "ไฟล์ว่างหรือไม่มีข้อมูล"); return; }
 
       // find the header row (skips any title / month-group rows above it)
       const headerRowIdx = aoa.findIndex(row =>
         (row as unknown[]).some(c => norm(String(c)) === "site")
       );
-      if (headerRowIdx < 0) { alert("ไม่พบแถวหัวตาราง (ต้องมีคอลัมน์ 'Site')"); return; }
+      if (headerRowIdx < 0) { showToast("error", "ไม่พบแถวหัวตาราง (ต้องมีคอลัมน์ 'Site')"); return; }
 
       const headers = (aoa[headerRowIdx] as unknown[]).map(h => String(h).trim());
       const find = (cands: string[]) => headers.findIndex(h => cands.includes(norm(h)));
@@ -417,7 +424,7 @@ export default function PlanGrid({ year = 2026, isAdmin = false, isLoggedIn = fa
       const idxS2    = find(["รอบที่ 2", "source_2", "รอบ 2"]);
       const idxS3    = find(["รอบที่ 3", "source_3", "รอบ 3"]);
 
-      if (idxName < 0) { alert("ไม่พบคอลัมน์ชื่อ Site (หัวคอลัมน์ต้องมี 'Site')"); return; }
+      if (idxName < 0) { showToast("error", "ไม่พบคอลัมน์ชื่อ Site (หัวคอลัมน์ต้องมี 'Site')"); return; }
 
       const weekCols: { idx: number; week: number }[] = [];
       headers.forEach((h, i) => {
@@ -447,12 +454,12 @@ export default function PlanGrid({ year = 2026, isAdmin = false, isLoggedIn = fa
         })
         .filter((r): r is NonNullable<typeof r> => r !== null);
 
-      if (rows.length === 0) { alert("ไม่พบข้อมูลที่นำเข้าได้"); return; }
+      if (rows.length === 0) { showToast("error", "ไม่พบข้อมูลที่นำเข้าได้"); return; }
       setPendingImport(rows); // open styled confirmation modal
     } catch (err) {
-      alert("อ่านไฟล์ไม่สำเร็จ: " + (err as Error).message);
+      showToast("error", "อ่านไฟล์ไม่สำเร็จ: " + (err as Error).message);
     }
-  }, []);
+  }, [showToast]);
 
   // confirm + run the import
   const doImport = useCallback(async () => {
@@ -471,13 +478,13 @@ export default function PlanGrid({ year = 2026, isAdmin = false, isLoggedIn = fa
       const result = await res.json();
       setPendingImport(null);
       await fetchData();
-      alert(`นำเข้าสำเร็จ: เพิ่มใหม่ ${result.inserted}, อัปเดต ${result.updated} site (${result.entries} สถานะ)`);
+      showToast("success", `นำเข้าสำเร็จ — เพิ่มใหม่ ${result.inserted}, อัปเดต ${result.updated} site (${result.entries} สถานะ)`);
     } catch (err) {
-      alert("นำเข้าไม่สำเร็จ: " + (err as Error).message);
+      showToast("error", "นำเข้าไม่สำเร็จ: " + (err as Error).message);
     } finally {
       setSaving(false);
     }
-  }, [pendingImport, year, fetchData]);
+  }, [pendingImport, year, fetchData, showToast]);
 
   // ── Column definitions ──────────────────────────────────────────────────────
   const columnDefs = useMemo<(ColDef | ColGroupDef)[]>(() => {
@@ -815,6 +822,18 @@ export default function PlanGrid({ year = 2026, isAdmin = false, isLoggedIn = fa
               </button>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Toast */}
+      {toast && (
+        <div
+          className={`fixed top-3 right-3 z-[60] max-w-sm px-4 py-2.5 rounded-lg shadow-lg text-sm text-white flex items-center gap-2 ${
+            toast.type === "success" ? "bg-emerald-600" : "bg-red-600"
+          }`}
+        >
+          <span>{toast.type === "success" ? "✓" : "⚠"}</span>
+          <span>{toast.msg}</span>
         </div>
       )}
     </div>
