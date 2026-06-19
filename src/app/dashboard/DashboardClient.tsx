@@ -38,6 +38,12 @@ export default function DashboardClient({
         )}
 
         <div className="flex items-center gap-3">
+          <button
+            onClick={() => router.push("/insights")}
+            className="text-[var(--text-muted)] hover:text-blue-400 transition-colors"
+          >
+            Insights
+          </button>
           <ThemeToggle />
           {isLoggedIn ? (
             <button
