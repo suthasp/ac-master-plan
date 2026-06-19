@@ -54,11 +54,12 @@ export async function POST(request: Request) {
       source_3: row.source_3 || null,
     };
 
-    // upsert by site name
+    // upsert by site name + type (same name is allowed if the Type differs)
     const { data: existing } = await supabase
       .from("sites")
       .select("id")
       .eq("name", trimmedName)
+      .eq("ac_type", fields.ac_type)
       .limit(1)
       .maybeSingle();
 

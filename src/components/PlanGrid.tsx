@@ -549,12 +549,18 @@ export default function PlanGrid({ year = 2026, isAdmin = false, isLoggedIn = fa
 
   const getRowId = useCallback((p: GetRowIdParams<RowData>) => p.data.id as string, []);
 
-  // duplicate site names in the pending import (upsert will merge them)
+  // duplicate site name + Type in the pending import (upsert will merge them);
+  // same name with a different Type is allowed and not flagged
   const importDupNames = (() => {
     if (!pendingImport) return [] as string[];
     const counts: Record<string, number> = {};
-    pendingImport.forEach(r => { counts[r.name] = (counts[r.name] ?? 0) + 1; });
-    return Object.keys(counts).filter(n => counts[n] > 1);
+    pendingImport.forEach(r => {
+      const key = `${r.name}|${r.ac_type}`;
+      counts[key] = (counts[key] ?? 0) + 1;
+    });
+    return Object.keys(counts)
+      .filter(k => counts[k] > 1)
+      .map(k => k.replace("|", " · "));
   })();
 
   // ── Render ──────────────────────────────────────────────────────────────────
@@ -786,7 +792,7 @@ export default function PlanGrid({ year = 2026, isAdmin = false, isLoggedIn = fa
 
             {importDupNames.length > 0 && (
               <p className="text-xs text-amber-500 bg-amber-500/10 border border-amber-500/40 rounded px-2 py-1.5 mb-3">
-                ⚠️ พบชื่อซ้ำในไฟล์ ({importDupNames.join(", ")}) — แถวที่ชื่อเหมือนกันจะถูกรวมเป็น site เดียว (ค่าจากแถวล่างสุดมีผล) แนะนำให้ตั้งชื่อไม่ซ้ำกัน
+                ⚠️ พบชื่อ+Type ซ้ำในไฟล์ ({importDupNames.join(", ")}) — แถวเหล่านี้จะถูกรวมเป็น site เดียว (ค่าจากแถวล่างสุดมีผล) · ชื่อซ้ำได้ถ้า Type ต่างกัน
               </p>
             )}
 
