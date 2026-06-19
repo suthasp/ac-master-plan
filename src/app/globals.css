@@ -55,17 +55,12 @@ body {
 
 /* Status cell colors (same in both themes) */
 .cell-planned {
-  background-color: #ffffff !important;
+  background-color: #d1d5db !important;
   color: #000000 !important;
   font-weight: 600;
   display: flex;
   align-items: center;
   justify-content: center;
-}
-
-/* keep "Planned" white cells visible on a white light-mode grid */
-:root.light .cell-planned {
-  border: 1px solid #94a3b8;
 }
 
 .cell-finished {

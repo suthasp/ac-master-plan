@@ -353,7 +353,7 @@ export default function PlanGrid({ year = 2026, isAdmin = false, isLoggedIn = fa
         if (!isSummary) {
           if (v === "F") { c.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FF22C55E" } }; c.font = { bold: true, color: { argb: "FF000000" } }; }
           else if (v === "D") { c.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFEF4444" } }; c.font = { bold: true, color: { argb: "FFFFFFFF" } }; }
-          else if (v === "P") { c.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFFFFFFF" } }; c.font = { bold: true, color: { argb: "FF000000" } }; }
+          else if (v === "P") { c.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFD1D5DB" } }; c.font = { bold: true, color: { argb: "FF000000" } }; }
         }
         col++;
       }));
@@ -623,7 +623,7 @@ export default function PlanGrid({ year = 2026, isAdmin = false, isLoggedIn = fa
         {/* Legend */}
         <div className="ml-auto flex items-center gap-3 text-xs">
           <span className="flex items-center gap-1">
-            <span className="inline-block w-5 h-5 bg-white text-black font-bold flex items-center justify-center rounded-sm">P</span>
+            <span className="inline-block w-5 h-5 bg-gray-300 text-black font-bold flex items-center justify-center rounded-sm">P</span>
             Planned
           </span>
           <span className="flex items-center gap-1">
