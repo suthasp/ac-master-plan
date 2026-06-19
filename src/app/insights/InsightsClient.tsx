@@ -96,6 +96,24 @@ export default function InsightsClient({
 
   const axisColor = "#94a3b8";
   const card = "bg-[var(--panel)] border border-[var(--border)] rounded-xl p-5";
+
+  // value + percent label centered inside each donut segment
+  const donutLabel = (p: {
+    cx?: number; cy?: number; midAngle?: number;
+    innerRadius?: number; outerRadius?: number; value?: number; percent?: number;
+  }) => {
+    const RAD = Math.PI / 180;
+    const cx = p.cx ?? 0, cy = p.cy ?? 0, midAngle = p.midAngle ?? 0;
+    const inner = p.innerRadius ?? 0, outer = p.outerRadius ?? 0;
+    const r = inner + (outer - inner) / 2;
+    const x = cx + r * Math.cos(-midAngle * RAD);
+    const y = cy + r * Math.sin(-midAngle * RAD);
+    return (
+      <text x={x} y={y} fill="#ffffff" textAnchor="middle" dominantBaseline="central" fontSize={13} fontWeight={700}>
+        {p.value} ({Math.round((p.percent ?? 0) * 100)}%)
+      </text>
+    );
+  };
   const tooltipProps = {
     cursor: false,
     contentStyle: {
@@ -183,7 +201,7 @@ export default function InsightsClient({
                 ) : (
                   <ResponsiveContainer width="100%" height={280}>
                     <PieChart>
-                      <Pie data={m.donut} dataKey="value" nameKey="name" innerRadius={60} outerRadius={100} paddingAngle={2}>
+                      <Pie data={m.donut} dataKey="value" nameKey="name" innerRadius={60} outerRadius={100} paddingAngle={2} label={donutLabel} labelLine={false}>
                         {m.donut.map((d, i) => <Cell key={i} fill={d.color} />)}
                       </Pie>
                       <Tooltip {...tooltipProps} />
