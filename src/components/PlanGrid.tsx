@@ -21,6 +21,7 @@ export interface Site {
   name: string;
   ac_count: number;
   ac_type: string;
+  site_type: string | null;
   source_1: string | null;
   source_2: string | null;
   source_3: string | null;
@@ -91,7 +92,7 @@ export default function PlanGrid({ year = 2026, isAdmin = false, isLoggedIn = fa
   const currentWeek = useMemo(() => getCurrentWeek(), []);
 
   // ── Add-site modal form ───────────────────────────────────────────────────────
-  const emptyForm = { name: "", ac_count: "", ac_type: "Precision", source_1: "", source_2: "", source_3: "" };
+  const emptyForm = { name: "", ac_count: "", ac_type: "Precision", site_type: "Big", source_1: "", source_2: "", source_3: "" };
   const [showAdd, setShowAdd] = useState(false);
   const [form, setForm] = useState(emptyForm);
 
@@ -192,6 +193,7 @@ export default function PlanGrid({ year = 2026, isAdmin = false, isLoggedIn = fa
           name: form.name.trim(),
           ac_count: parseInt(form.ac_count, 10) || 0,
           ac_type: form.ac_type,
+          site_type: form.site_type,
           source_1: form.source_1.trim() || null,
           source_2: form.source_2.trim() || null,
           source_3: form.source_3.trim() || null,
@@ -254,6 +256,7 @@ export default function PlanGrid({ year = 2026, isAdmin = false, isLoggedIn = fa
       const idxName  = find(["site", "name", "ชื่อ", "ชื่อ site"]);
       const idxCount = find(["จำนวนทั้งหมด", "ac_count", "# ac", "จำนวน"]);
       const idxType  = find(["type", "ac_type", "ประเภท"]);
+      const idxSiteType = find(["site type", "site_type", "ขนาด"]);
       const idxS1    = find(["รอบที่ 1", "source_1", "รอบ 1"]);
       const idxS2    = find(["รอบที่ 2", "source_2", "รอบ 2"]);
       const idxS3    = find(["รอบที่ 3", "source_3", "รอบ 3"]);
@@ -279,6 +282,7 @@ export default function PlanGrid({ year = 2026, isAdmin = false, isLoggedIn = fa
             name,
             ac_count: idxCount >= 0 ? Number(r[idxCount]) || 0 : 0,
             ac_type: idxType >= 0 ? String(r[idxType] ?? "").trim() || "Precision" : "Precision",
+            site_type: idxSiteType >= 0 ? String(r[idxSiteType] ?? "").trim() || null : null,
             source_1: idxS1 >= 0 ? String(r[idxS1] ?? "").trim() || null : null,
             source_2: idxS2 >= 0 ? String(r[idxS2] ?? "").trim() || null : null,
             source_3: idxS3 >= 0 ? String(r[idxS3] ?? "").trim() || null : null,
@@ -345,6 +349,8 @@ export default function PlanGrid({ year = 2026, isAdmin = false, isLoggedIn = fa
         valueParser: p => parseInt(p.newValue, 10) || 0 },
       { field: "ac_type", headerName: "Type", pinned: "left", width: 100, editable: siteEditable,
         cellEditor: "agSelectCellEditor", cellEditorParams: { values: ["Precision", "Comfort"] } },
+      { field: "site_type", headerName: "Site Type", pinned: "left", width: 100, editable: siteEditable,
+        cellEditor: "agSelectCellEditor", cellEditorParams: { values: ["Big", "Medium"] } },
       { field: "source_1", headerName: "รอบที่ 1", pinned: "left", width: 100, editable: siteEditable },
       { field: "source_2", headerName: "รอบที่ 2", pinned: "left", width: 100, editable: siteEditable },
       { field: "source_3", headerName: "รอบที่ 3", pinned: "left", width: 100, editable: siteEditable },
@@ -381,6 +387,7 @@ export default function PlanGrid({ year = 2026, isAdmin = false, isLoggedIn = fa
       name: "SUMMARY",
       ac_count: rowData.reduce((sum, r) => sum + (Number(r.ac_count) || 0), 0),
       ac_type: "",
+      site_type: "",
       source_1: sumSource("source_1"),
       source_2: sumSource("source_2"),
       source_3: sumSource("source_3"),
@@ -557,6 +564,18 @@ export default function PlanGrid({ year = 2026, isAdmin = false, isLoggedIn = fa
                   </select>
                 </label>
               </div>
+
+              <label className="block">
+                <span className="text-[var(--app-text)]">Site Type</span>
+                <select
+                  value={form.site_type}
+                  onChange={e => setForm(f => ({ ...f, site_type: e.target.value }))}
+                  className="mt-1 w-full bg-[var(--panel-2)] border border-[var(--border)] text-[var(--app-text)] rounded px-3 py-1.5 focus:outline-none focus:border-blue-500"
+                >
+                  <option value="Big">Big</option>
+                  <option value="Medium">Medium</option>
+                </select>
+              </label>
 
               <div className="grid grid-cols-3 gap-3">
                 {([1, 2, 3] as const).map(n => (

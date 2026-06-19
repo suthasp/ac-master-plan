@@ -9,6 +9,7 @@ CREATE TABLE IF NOT EXISTS public.sites (
   name         TEXT NOT NULL,
   ac_count     INTEGER NOT NULL DEFAULT 1,
   ac_type      TEXT NOT NULL DEFAULT 'Precision',
+  site_type    TEXT,   -- 'Big' | 'Medium'
   source_1     TEXT,   -- e.g. "1/2026"
   source_2     TEXT,
   source_3     TEXT,

@@ -6,6 +6,7 @@ interface ImportRow {
   name: string;
   ac_count?: number;
   ac_type?: string;
+  site_type?: string | null;
   source_1?: string | null;
   source_2?: string | null;
   source_3?: string | null;
@@ -47,6 +48,7 @@ export async function POST(request: Request) {
       name: trimmedName,
       ac_count: Number(row.ac_count) || 0,
       ac_type: row.ac_type || "Precision",
+      site_type: row.site_type || null,
       source_1: row.source_1 || null,
       source_2: row.source_2 || null,
       source_3: row.source_3 || null,
