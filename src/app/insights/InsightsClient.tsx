@@ -16,29 +16,15 @@ interface Site {
   ac_count: number;
   ac_type: string;
   site_type: string | null;
-}
-interface PlanEntry {
-  site_id: string;
-  week_number: number;
-  status: "P" | "F" | "D";
+  source_1: string | null;
+  source_2: string | null;
+  source_3: string | null;
 }
 
-const MONTHS = [
-  { name: "Jan", weeks: [1, 2, 3, 4, 5] },
-  { name: "Feb", weeks: [6, 7, 8, 9] },
-  { name: "Mar", weeks: [10, 11, 12, 13] },
-  { name: "Apr", weeks: [14, 15, 16, 17, 18] },
-  { name: "May", weeks: [19, 20, 21, 22] },
-  { name: "Jun", weeks: [23, 24, 25, 26, 27] },
-  { name: "Jul", weeks: [28, 29, 30, 31] },
-  { name: "Aug", weeks: [32, 33, 34, 35] },
-  { name: "Sep", weeks: [36, 37, 38, 39, 40] },
-  { name: "Oct", weeks: [41, 42, 43, 44] },
-  { name: "Nov", weeks: [45, 46, 47, 48] },
-  { name: "Dec", weeks: [49, 50, 51, 52] },
-];
-
-const COLORS = { P: "#9ca3af", F: "#22c55e", D: "#ef4444" };
+type Round = 1 | 2 | 3;
+const ROUND_COLORS = ["#3b82f6", "#22c55e", "#8b5cf6"];
+const DONE_COLOR = "#22c55e";
+const REMAIN_COLOR = "#9ca3af";
 
 export default function InsightsClient({
   userEmail,
@@ -52,14 +38,13 @@ export default function InsightsClient({
   const router = useRouter();
   const supabase = createClient();
   const [sites, setSites] = useState<Site[]>([]);
-  const [entries, setEntries] = useState<PlanEntry[]>([]);
   const [loading, setLoading] = useState(true);
+  const [round, setRound] = useState<Round>(1);
 
   useEffect(() => {
     (async () => {
-      const [s, e] = await Promise.all([fetch("/api/sites"), fetch("/api/entries")]);
-      setSites(await s.json());
-      setEntries(await e.json());
+      const res = await fetch("/api/sites");
+      setSites(await res.json());
       setLoading(false);
     })();
   }, []);
@@ -70,39 +55,44 @@ export default function InsightsClient({
   }, [supabase, router]);
 
   const m = useMemo(() => {
-    const totalSites = sites.length;
-    const totalAC = sites.reduce((s, r) => s + (Number(r.ac_count) || 0), 0);
-    const P = entries.filter(e => e.status === "P").length;
-    const F = entries.filter(e => e.status === "F").length;
-    const scheduled = P + F;
-    const pctComplete = scheduled ? Math.round((F / scheduled) * 100) : 0;
+    const field = `source_${round}` as "source_1" | "source_2" | "source_3";
+    const doneOf = (s: Site) => Number(s[field]) || 0;
 
-    const statusData = [
-      { name: "Planned", value: P, color: COLORS.P },
-      { name: "Finished", value: F, color: COLORS.F },
+    const totalAC = sites.reduce((a, s) => a + (Number(s.ac_count) || 0), 0);
+    const doneAC = sites.reduce((a, s) => a + doneOf(s), 0);
+    const remaining = Math.max(totalAC - doneAC, 0);
+    const pct = totalAC ? Math.round((doneAC / totalAC) * 100) : 0;
+
+    const donut = [
+      { name: "ทำแล้ว", value: doneAC, color: DONE_COLOR },
+      { name: "คงเหลือ", value: remaining, color: REMAIN_COLOR },
     ].filter(d => d.value > 0);
 
-    const byMonth = MONTHS.map(month => {
-      const wk = new Set(month.weeks);
-      const inMonth = entries.filter(e => wk.has(e.week_number));
+    // overview across all rounds
+    const allRounds = ([1, 2, 3] as Round[]).map(r => {
+      const f = `source_${r}` as "source_1" | "source_2" | "source_3";
       return {
-        name: month.name,
-        Planned: inMonth.filter(e => e.status === "P").length,
-        Finished: inMonth.filter(e => e.status === "F").length,
+        name: `รอบ ${r}`,
+        "ทำแล้ว": sites.reduce((a, s) => a + (Number(s[f]) || 0), 0),
       };
     });
 
-    const acBySiteType = ["Big", "Medium"].map(t => ({
-      name: t,
-      AC: sites.filter(s => (s.site_type ?? "") === t).reduce((a, s) => a + (Number(s.ac_count) || 0), 0),
-    }));
-    const acByType = ["Precision", "Comfort"].map(t => ({
-      name: t,
-      AC: sites.filter(s => s.ac_type === t).reduce((a, s) => a + (Number(s.ac_count) || 0), 0),
-    }));
+    const group = (key: "site_type" | "ac_type", values: string[]) =>
+      values.map(v => {
+        const inGroup = sites.filter(s => (key === "site_type" ? (s.site_type ?? "") : s.ac_type) === v);
+        return {
+          name: v,
+          "ทั้งหมด": inGroup.reduce((a, s) => a + (Number(s.ac_count) || 0), 0),
+          "ทำแล้ว": inGroup.reduce((a, s) => a + doneOf(s), 0),
+        };
+      });
 
-    return { totalSites, totalAC, pctComplete, statusData, byMonth, acBySiteType, acByType };
-  }, [sites, entries]);
+    return {
+      totalAC, doneAC, remaining, pct, donut, allRounds,
+      bySiteType: group("site_type", ["Big", "Medium"]),
+      byAcType: group("ac_type", ["Precision", "Comfort"]),
+    };
+  }, [sites, round]);
 
   const axisColor = "#94a3b8";
   const card = "bg-[var(--panel)] border border-[var(--border)] rounded-xl p-5";
@@ -132,8 +122,24 @@ export default function InsightsClient({
       </div>
 
       <div className="max-w-6xl mx-auto p-6">
-        <h1 className="text-2xl font-bold mb-1">Insights</h1>
-        <p className="text-[var(--text-muted)] text-sm mb-6">ภาพรวมแผนติดตั้งแอร์ทั้งหมด — สรุปสถานะ ความคืบหน้า และการกระจายตามประเภท</p>
+        <div className="flex flex-wrap items-end justify-between gap-3 mb-6">
+          <div>
+            <h1 className="text-2xl font-bold mb-1">Insights</h1>
+            <p className="text-[var(--text-muted)] text-sm">ความคืบหน้า PM ตามจำนวนแอร์ — แอร์ทั้งหมดเทียบกับที่ทำแล้วในแต่ละรอบ</p>
+          </div>
+          <label className="flex items-center gap-2 text-sm">
+            <span className="text-[var(--text-muted)]">ดูรอบ PM:</span>
+            <select
+              value={round}
+              onChange={e => setRound(Number(e.target.value) as Round)}
+              className="bg-[var(--panel-2)] border border-[var(--border)] text-[var(--app-text)] rounded px-3 py-1.5 focus:outline-none focus:border-blue-500"
+            >
+              <option value={1}>รอบที่ 1</option>
+              <option value={2}>รอบที่ 2</option>
+              <option value={3}>รอบที่ 3</option>
+            </select>
+          </label>
+        </div>
 
         {loading ? (
           <div className="text-[var(--text-muted)] py-20 text-center">กำลังโหลดข้อมูล...</div>
@@ -142,30 +148,33 @@ export default function InsightsClient({
             {/* metric cards */}
             <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
               <div className={card}>
-                <div className="text-[var(--text-muted)] text-sm mb-1">จำนวน Site</div>
-                <div className="text-3xl font-bold">{m.totalSites}</div>
-              </div>
-              <div className={card}>
                 <div className="text-[var(--text-muted)] text-sm mb-1">จำนวนแอร์ทั้งหมด</div>
                 <div className="text-3xl font-bold">{m.totalAC.toLocaleString()}</div>
               </div>
               <div className={card}>
-                <div className="text-green-500 text-sm font-semibold mb-1">Percent Complete</div>
-                <div className="text-3xl font-bold text-green-500">{m.pctComplete}<span className="text-lg">%</span></div>
+                <div className="text-green-500 text-sm font-semibold mb-1">ทำแล้ว (รอบที่ {round})</div>
+                <div className="text-3xl font-bold text-green-500">
+                  {m.doneAC.toLocaleString()}
+                  <span className="text-base text-[var(--text-muted)] font-normal"> / {m.totalAC.toLocaleString()}</span>
+                </div>
+              </div>
+              <div className={card}>
+                <div className="text-blue-500 text-sm font-semibold mb-1">Percent Complete (รอบที่ {round})</div>
+                <div className="text-3xl font-bold text-blue-500">{m.pct}<span className="text-lg">%</span></div>
               </div>
             </div>
 
-            {/* donut + monthly */}
+            {/* donut + all rounds overview */}
             <div className="grid lg:grid-cols-2 gap-4">
               <div className={card}>
-                <h2 className="font-semibold mb-3">สรุปสถานะ (Status Breakdown)</h2>
-                {m.statusData.length === 0 ? (
-                  <div className="text-[var(--text-muted)] text-sm py-16 text-center">ยังไม่มีข้อมูลสถานะ</div>
+                <h2 className="font-semibold mb-3">ทำแล้ว vs คงเหลือ (รอบที่ {round})</h2>
+                {m.donut.length === 0 ? (
+                  <div className="text-[var(--text-muted)] text-sm py-16 text-center">ยังไม่มีข้อมูล</div>
                 ) : (
                   <ResponsiveContainer width="100%" height={280}>
                     <PieChart>
-                      <Pie data={m.statusData} dataKey="value" nameKey="name" innerRadius={60} outerRadius={100} paddingAngle={2}>
-                        {m.statusData.map((d, i) => <Cell key={i} fill={d.color} />)}
+                      <Pie data={m.donut} dataKey="value" nameKey="name" innerRadius={60} outerRadius={100} paddingAngle={2}>
+                        {m.donut.map((d, i) => <Cell key={i} fill={d.color} />)}
                       </Pie>
                       <Tooltip />
                       <Legend />
@@ -175,44 +184,48 @@ export default function InsightsClient({
               </div>
 
               <div className={card}>
-                <h2 className="font-semibold mb-3">ความคืบหน้ารายเดือน</h2>
+                <h2 className="font-semibold mb-3">ภาพรวมทุกรอบ (จำนวนแอร์ที่ทำแล้ว)</h2>
                 <ResponsiveContainer width="100%" height={280}>
-                  <BarChart data={m.byMonth}>
+                  <BarChart data={m.allRounds}>
                     <CartesianGrid strokeDasharray="3 3" stroke="rgba(148,163,184,0.2)" />
-                    <XAxis dataKey="name" tick={{ fill: axisColor, fontSize: 11 }} />
+                    <XAxis dataKey="name" tick={{ fill: axisColor, fontSize: 12 }} />
                     <YAxis tick={{ fill: axisColor, fontSize: 11 }} allowDecimals={false} />
                     <Tooltip />
-                    <Legend />
-                    <Bar dataKey="Planned" fill={COLORS.P} stackId="a" />
-                    <Bar dataKey="Finished" fill={COLORS.F} stackId="a" />
+                    <Bar dataKey="ทำแล้ว" radius={[4, 4, 0, 0]}>
+                      {m.allRounds.map((_, i) => <Cell key={i} fill={ROUND_COLORS[i]} />)}
+                    </Bar>
                   </BarChart>
                 </ResponsiveContainer>
               </div>
             </div>
 
-            {/* AC by type */}
+            {/* by type (done vs total for selected round) */}
             <div className="grid lg:grid-cols-2 gap-4">
               <div className={card}>
-                <h2 className="font-semibold mb-3">จำนวนแอร์ตาม Site Type</h2>
+                <h2 className="font-semibold mb-3">ตาม Site Type (รอบที่ {round})</h2>
                 <ResponsiveContainer width="100%" height={240}>
-                  <BarChart data={m.acBySiteType}>
+                  <BarChart data={m.bySiteType}>
                     <CartesianGrid strokeDasharray="3 3" stroke="rgba(148,163,184,0.2)" />
-                    <XAxis dataKey="name" tick={{ fill: axisColor, fontSize: 11 }} />
+                    <XAxis dataKey="name" tick={{ fill: axisColor, fontSize: 12 }} />
                     <YAxis tick={{ fill: axisColor, fontSize: 11 }} allowDecimals={false} />
                     <Tooltip />
-                    <Bar dataKey="AC" fill="#3b82f6" radius={[4, 4, 0, 0]} />
+                    <Legend />
+                    <Bar dataKey="ทั้งหมด" fill={REMAIN_COLOR} radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="ทำแล้ว" fill={DONE_COLOR} radius={[4, 4, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
               <div className={card}>
-                <h2 className="font-semibold mb-3">จำนวนแอร์ตาม Type</h2>
+                <h2 className="font-semibold mb-3">ตาม Type (รอบที่ {round})</h2>
                 <ResponsiveContainer width="100%" height={240}>
-                  <BarChart data={m.acByType}>
+                  <BarChart data={m.byAcType}>
                     <CartesianGrid strokeDasharray="3 3" stroke="rgba(148,163,184,0.2)" />
-                    <XAxis dataKey="name" tick={{ fill: axisColor, fontSize: 11 }} />
+                    <XAxis dataKey="name" tick={{ fill: axisColor, fontSize: 12 }} />
                     <YAxis tick={{ fill: axisColor, fontSize: 11 }} allowDecimals={false} />
                     <Tooltip />
-                    <Bar dataKey="AC" fill="#8b5cf6" radius={[4, 4, 0, 0]} />
+                    <Legend />
+                    <Bar dataKey="ทั้งหมด" fill={REMAIN_COLOR} radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="ทำแล้ว" fill={DONE_COLOR} radius={[4, 4, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
