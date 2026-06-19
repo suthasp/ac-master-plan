@@ -43,9 +43,11 @@ const COLORS = { P: "#9ca3af", F: "#22c55e", D: "#ef4444" };
 export default function InsightsClient({
   userEmail,
   isLoggedIn,
+  isAdmin,
 }: {
   userEmail: string;
   isLoggedIn: boolean;
+  isAdmin: boolean;
 }) {
   const router = useRouter();
   const supabase = createClient();
@@ -122,7 +124,9 @@ export default function InsightsClient({
           <ThemeToggle />
           {isLoggedIn ? (
             <>
-              <span className="text-[var(--text-muted)] text-xs hidden sm:inline">{userEmail}</span>
+              <span className="text-[var(--text-muted)] text-xs hidden sm:inline">
+                {userEmail} <span className="text-blue-400">({isAdmin ? "admin" : "viewer"})</span>
+              </span>
               <button onClick={handleLogout} className="text-red-400 hover:text-red-300">Logout</button>
             </>
           ) : (
