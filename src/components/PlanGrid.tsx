@@ -262,7 +262,7 @@ export default function PlanGrid({ year = 2026, isAdmin = false, isLoggedIn = fa
       { field: "name", headerName: "Site", pinned: "left", width: 160, cellStyle: { fontWeight: 600 }, editable: siteEditable },
       { field: "ac_count", headerName: "จำนวนทั้งหมด", pinned: "left", width: 100, type: "numericColumn", editable: siteEditable,
         valueParser: p => parseInt(p.newValue, 10) || 0 },
-      { field: "ac_type", headerName: "Type", pinned: "left", width: 80, editable: siteEditable,
+      { field: "ac_type", headerName: "Type", pinned: "left", width: 100, editable: siteEditable,
         cellEditor: "agSelectCellEditor", cellEditorParams: { values: ["Precision", "Comfort"] } },
       { field: "source_1", headerName: "รอบที่ 1", pinned: "left", width: 100, editable: siteEditable },
       { field: "source_2", headerName: "รอบที่ 2", pinned: "left", width: 100, editable: siteEditable },
