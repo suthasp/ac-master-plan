@@ -28,37 +28,40 @@ export default function DashboardClient({
     <div className="flex flex-col h-screen">
       {/* Top bar */}
       <div className="flex items-center justify-between px-4 py-1 bg-[var(--panel-2)] border-b border-[var(--border)] text-sm flex-shrink-0">
-        {isLoggedIn ? (
-          <span className="text-[var(--app-text)]">
-            {userEmail}
-            <span className="ml-2 text-xs text-blue-400">({isAdmin ? "admin" : "viewer"})</span>
-          </span>
-        ) : (
-          <span className="text-[var(--text-muted)] text-xs">โหมดดูอย่างเดียว (ยังไม่ได้เข้าสู่ระบบ)</span>
-        )}
-
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-4">
+          <span className="text-blue-400 font-semibold">Plan</span>
           <button
             onClick={() => router.push("/insights")}
             className="text-[var(--text-muted)] hover:text-blue-400 transition-colors"
           >
             Insights
           </button>
+        </div>
+
+        <div className="flex items-center gap-3">
           <ThemeToggle />
           {isLoggedIn ? (
-            <button
-              onClick={handleLogout}
-              className="text-red-400 hover:text-red-300 transition-colors"
-            >
-              Logout
-            </button>
+            <>
+              <span className="text-[var(--text-muted)] text-xs hidden sm:inline">
+                {userEmail} <span className="text-blue-400">({isAdmin ? "admin" : "viewer"})</span>
+              </span>
+              <button
+                onClick={handleLogout}
+                className="text-red-400 hover:text-red-300 transition-colors"
+              >
+                Logout
+              </button>
+            </>
           ) : (
-            <button
-              onClick={() => router.push("/login")}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-0.5 rounded transition-colors"
-            >
-              Login
-            </button>
+            <>
+              <span className="text-[var(--text-muted)] text-xs hidden sm:inline">โหมดดูอย่างเดียว</span>
+              <button
+                onClick={() => router.push("/login")}
+                className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-0.5 rounded transition-colors"
+              >
+                Login
+              </button>
+            </>
           )}
         </div>
       </div>
