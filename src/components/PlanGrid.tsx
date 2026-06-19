@@ -12,6 +12,7 @@ import type {
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-alpine.css";
 import * as XLSX from "xlsx";
+import type ExcelJSType from "exceljs";
 import { useTheme } from "./ThemeProvider";
 
 // ── Types ────────────────────────────────────────────────────────────────────
@@ -230,13 +231,148 @@ export default function PlanGrid({ year = 2026, isAdmin = false, isLoggedIn = fa
     }
   }, [fetchData]);
 
-  // ── Export ──────────────────────────────────────────────────────────────────
-  const exportCsv = useCallback(() => {
-    gridRef.current?.api.exportDataAsCsv({
-      fileName: `ac-plan-${year}.csv`,
-      skipPinnedBottom: true, // exclude the computed SUMMARY row
+  // ── Summary pinned bottom row ───────────────────────────────────────────────
+  const pinnedBottomRowData = useMemo<RowData[]>(() => {
+    const sumSource = (field: string) => {
+      const total = rowData.reduce((sum, r) => sum + (Number(r[field]) || 0), 0);
+      return total ? String(total) : "";
+    };
+
+    const summary: RowData = {
+      id: "__summary__",
+      name: "SUMMARY",
+      ac_count: rowData.reduce((sum, r) => sum + (Number(r.ac_count) || 0), 0),
+      ac_type: "",
+      site_type: "",
+      source_1: sumSource("source_1"),
+      source_2: sumSource("source_2"),
+      source_3: sumSource("source_3"),
+    };
+    for (let w = 1; w <= 52; w++) {
+      const p = rowData.filter(r => r[`wk_${w}`] === "P").length;
+      const f = rowData.filter(r => r[`wk_${w}`] === "F").length;
+      const total = p + f;
+      summary[`wk_${w}`] = total ? String(total) : "";
+    }
+    return [summary];
+  }, [rowData]);
+
+  // ── Export to a styled .xlsx workbook ─────────────────────────────────────────
+  const exportExcel = useCallback(async () => {
+    const ExcelJS = (await import("exceljs")).default;
+    const wb = new ExcelJS.Workbook();
+    const ws = wb.addWorksheet(`AC Plan ${year}`, {
+      views: [{ state: "frozen", xSplit: 7, ySplit: 3 }],
     });
-  }, [year]);
+
+    const leftHeaders = ["Site", "จำนวนทั้งหมด", "Type", "Site Type", "รอบที่ 1", "รอบที่ 2", "รอบที่ 3"];
+    const totalCols = leftHeaders.length + 52;
+
+    const thin: Partial<ExcelJSType.Borders> = {
+      top: { style: "thin", color: { argb: "FFBFBFBF" } },
+      left: { style: "thin", color: { argb: "FFBFBFBF" } },
+      bottom: { style: "thin", color: { argb: "FFBFBFBF" } },
+      right: { style: "thin", color: { argb: "FFBFBFBF" } },
+    };
+    const styleHeader = (c: ExcelJSType.Cell) => {
+      c.font = { bold: true, color: { argb: "FFFFFFFF" }, size: 10 };
+      c.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FF1F3A6E" } };
+      c.alignment = { vertical: "middle", horizontal: "center", wrapText: true };
+      c.border = thin;
+    };
+
+    // Row 1: title banner
+    ws.mergeCells(1, 1, 1, totalCols);
+    const title = ws.getCell(1, 1);
+    title.value = `AC Master Plan ${year} (AMC)`;
+    title.font = { bold: true, size: 14, color: { argb: "FFFFFFFF" } };
+    title.alignment = { vertical: "middle", horizontal: "left", indent: 1 };
+    title.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FF0F3460" } };
+    ws.getRow(1).height = 24;
+
+    // Row 2: month groups over the week columns
+    let cur = leftHeaders.length + 1;
+    MONTHS.forEach(month => {
+      const start = cur;
+      month.weeks.forEach(w => {
+        const c = ws.getCell(3, cur);
+        c.value = w;
+        styleHeader(c);
+        if (w === currentWeek) c.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFCA8A04" } };
+        cur++;
+      });
+      ws.mergeCells(2, start, 2, cur - 1);
+      const m = ws.getCell(2, start);
+      m.value = month.name;
+      styleHeader(m);
+    });
+
+    // Row 3: field headers (week numbers already filled above)
+    leftHeaders.forEach((h, i) => {
+      const c = ws.getCell(3, i + 1);
+      c.value = h;
+      styleHeader(c);
+    });
+
+    const writeRow = (excelRow: ExcelJSType.Row, r: RowData, isSummary: boolean) => {
+      excelRow.getCell(1).value = String(r.name ?? "");
+      excelRow.getCell(2).value = Number(r.ac_count) || (isSummary ? 0 : 0);
+      excelRow.getCell(3).value = String(r.ac_type ?? "");
+      excelRow.getCell(4).value = String(r.site_type ?? "");
+      excelRow.getCell(5).value = String(r.source_1 ?? "");
+      excelRow.getCell(6).value = String(r.source_2 ?? "");
+      excelRow.getCell(7).value = String(r.source_3 ?? "");
+      let col = leftHeaders.length + 1;
+      MONTHS.forEach(month => month.weeks.forEach(w => {
+        const v = String(r[`wk_${w}`] ?? "");
+        const c = excelRow.getCell(col);
+        c.value = v;
+        c.alignment = { horizontal: "center", vertical: "middle" };
+        c.border = thin;
+        if (!isSummary) {
+          if (v === "F") { c.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FF22C55E" } }; c.font = { bold: true, color: { argb: "FF000000" } }; }
+          else if (v === "D") { c.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFEF4444" } }; c.font = { bold: true, color: { argb: "FFFFFFFF" } }; }
+          else if (v === "P") { c.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFFFFFFF" } }; c.font = { bold: true, color: { argb: "FF000000" } }; }
+        }
+        col++;
+      }));
+      // left columns formatting + borders
+      for (let i = 1; i <= leftHeaders.length; i++) {
+        const c = excelRow.getCell(i);
+        c.border = thin;
+        c.alignment = { horizontal: i === 2 ? "right" : "left", vertical: "middle" };
+      }
+      if (isSummary) {
+        for (let i = 1; i <= totalCols; i++) {
+          const c = excelRow.getCell(i);
+          c.font = { bold: true, color: { argb: "FFFFFFFF" } };
+          c.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FF0F3460" } };
+        }
+      }
+    };
+
+    rowData.forEach((r, i) => writeRow(ws.getRow(4 + i), r, false));
+    writeRow(ws.getRow(4 + rowData.length), pinnedBottomRowData[0], true);
+
+    // column widths
+    ws.getColumn(1).width = 22;
+    ws.getColumn(2).width = 12;
+    ws.getColumn(3).width = 11;
+    ws.getColumn(4).width = 11;
+    [5, 6, 7].forEach(i => (ws.getColumn(i).width = 10));
+    for (let i = 8; i <= totalCols; i++) ws.getColumn(i).width = 4.5;
+
+    const buf = await wb.xlsx.writeBuffer();
+    const blob = new Blob([buf], {
+      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `ac-plan-${year}.xlsx`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }, [year, rowData, pinnedBottomRowData, currentWeek]);
 
   // ── Import from Excel/CSV (admin) ─────────────────────────────────────────────
   // Expected columns (same as Export CSV): Site, จำนวนทั้งหมด, Type,
@@ -250,7 +386,13 @@ export default function PlanGrid({ year = 2026, isAdmin = false, isLoggedIn = fa
       const aoa = XLSX.utils.sheet_to_json<unknown[]>(ws, { header: 1, raw: false, defval: "" });
       if (aoa.length < 2) { alert("ไฟล์ว่างหรือไม่มีข้อมูล"); return; }
 
-      const headers = (aoa[0] as unknown[]).map(h => String(h).trim());
+      // find the header row (skips any title / month-group rows above it)
+      const headerRowIdx = aoa.findIndex(row =>
+        (row as unknown[]).some(c => norm(String(c)) === "site")
+      );
+      if (headerRowIdx < 0) { alert("ไม่พบแถวหัวตาราง (ต้องมีคอลัมน์ 'Site')"); return; }
+
+      const headers = (aoa[headerRowIdx] as unknown[]).map(h => String(h).trim());
       const find = (cands: string[]) => headers.findIndex(h => cands.includes(norm(h)));
 
       const idxName  = find(["site", "name", "ชื่อ", "ชื่อ site"]);
@@ -269,7 +411,7 @@ export default function PlanGrid({ year = 2026, isAdmin = false, isLoggedIn = fa
         if (Number.isInteger(n) && n >= 1 && n <= 53) weekCols.push({ idx: i, week: n });
       });
 
-      const rows = (aoa.slice(1) as unknown[][])
+      const rows = (aoa.slice(headerRowIdx + 1) as unknown[][])
         .map(r => {
           const name = String(r[idxName] ?? "").trim();
           if (!name || name.toUpperCase() === "SUMMARY") return null;
@@ -375,32 +517,6 @@ export default function PlanGrid({ year = 2026, isAdmin = false, isLoggedIn = fa
     return [...pinned, ...monthGroups];
   }, [currentWeek, deleteRow, isAdmin]);
 
-  // ── Summary pinned bottom row ───────────────────────────────────────────────
-  const pinnedBottomRowData = useMemo<RowData[]>(() => {
-    const sumSource = (field: string) => {
-      const total = rowData.reduce((sum, r) => sum + (Number(r[field]) || 0), 0);
-      return total ? String(total) : "";
-    };
-
-    const summary: RowData = {
-      id: "__summary__",
-      name: "SUMMARY",
-      ac_count: rowData.reduce((sum, r) => sum + (Number(r.ac_count) || 0), 0),
-      ac_type: "",
-      site_type: "",
-      source_1: sumSource("source_1"),
-      source_2: sumSource("source_2"),
-      source_3: sumSource("source_3"),
-    };
-    for (let w = 1; w <= 52; w++) {
-      const p = rowData.filter(r => r[`wk_${w}`] === "P").length;
-      const f = rowData.filter(r => r[`wk_${w}`] === "F").length;
-      const total = p + f;
-      summary[`wk_${w}`] = total ? String(total) : "";
-    }
-    return [summary];
-  }, [rowData]);
-
   const getRowId = useCallback((p: GetRowIdParams<RowData>) => p.data.id as string, []);
 
   // ── Render ──────────────────────────────────────────────────────────────────
@@ -452,10 +568,10 @@ export default function PlanGrid({ year = 2026, isAdmin = false, isLoggedIn = fa
         )}
 
         <button
-          onClick={exportCsv}
+          onClick={exportExcel}
           className="bg-green-700 hover:bg-green-600 text-white text-sm px-3 py-1 rounded transition-colors"
         >
-          Export CSV
+          Export Excel
         </button>
 
         {saving && <span className="text-yellow-400 text-xs animate-pulse">Saving...</span>}
