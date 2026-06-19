@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run *)",
+      "Bash(git commit -m 'feat: use Noto Sans Thai google font across app and grid *)",
+      "Bash(git commit -m 'fix: apply Noto Sans Thai directly to body and AG Grid theme *)"
+    ]
+  }
+}

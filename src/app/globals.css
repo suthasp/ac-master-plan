@@ -13,17 +13,12 @@
   --ag-selected-row-background-color: #1a3a6e;
   --ag-font-size: 12px;
   --ag-cell-horizontal-padding: 4px;
-  --ag-font-family: var(--font-noto-thai), 'Segoe UI', sans-serif;
 }
 
 body {
   background: #0d0d1a;
   color: #e0e0e0;
-  font-family: var(--font-noto-thai), 'Segoe UI', sans-serif;
-}
-
-.ag-theme-alpine-dark {
-  --ag-font-family: var(--font-noto-thai), 'Segoe UI', sans-serif;
+  font-family: 'Segoe UI', sans-serif;
 }
 
 .ag-theme-alpine-dark .ag-header-group-cell {
