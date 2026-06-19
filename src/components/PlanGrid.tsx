@@ -263,7 +263,7 @@ export default function PlanGrid({ year = 2026, isAdmin = false, isLoggedIn = fa
       { field: "ac_count", headerName: "จำนวนทั้งหมด", pinned: "left", width: 100, type: "numericColumn", editable: siteEditable,
         valueParser: p => parseInt(p.newValue, 10) || 0 },
       { field: "ac_type", headerName: "Type", pinned: "left", width: 80, editable: siteEditable,
-        cellEditor: "agSelectCellEditor", cellEditorParams: { values: ["Precision", "Split"] } },
+        cellEditor: "agSelectCellEditor", cellEditorParams: { values: ["Precision", "Comfort"] } },
       { field: "source_1", headerName: "รอบที่ 1", pinned: "left", width: 100, editable: siteEditable },
       { field: "source_2", headerName: "รอบที่ 2", pinned: "left", width: 100, editable: siteEditable },
       { field: "source_3", headerName: "รอบที่ 3", pinned: "left", width: 100, editable: siteEditable },
@@ -450,7 +450,7 @@ export default function PlanGrid({ year = 2026, isAdmin = false, isLoggedIn = fa
                     className="mt-1 w-full bg-[#0f3460] border border-[#2d3561] text-white rounded px-3 py-1.5 focus:outline-none focus:border-blue-500"
                   >
                     <option value="Precision">Precision</option>
-                    <option value="Split">Split</option>
+                    <option value="Comfort">Comfort</option>
                   </select>
                 </label>
               </div>

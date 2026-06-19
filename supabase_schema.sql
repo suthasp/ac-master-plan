@@ -66,7 +66,7 @@ CREATE POLICY "auth_delete_entries" ON public.plan_entries FOR DELETE TO authent
 INSERT INTO public.sites (name, ac_count, ac_type, source_1, source_2) VALUES
   ('Site A - Data Center 1',  4, 'Precision', '1/2026', '2/2026'),
   ('Site B - Server Room',    2, 'Precision', '1/2026', NULL),
-  ('Site C - Office HQ',      6, 'Split',     '2/2026', '3/2026'),
+  ('Site C - Office HQ',      6, 'Comfort',   '2/2026', '3/2026'),
   ('Site D - Warehouse',      3, 'Precision', '1/2026', NULL),
-  ('Site E - Branch Office',  2, 'Split',     '3/2026', NULL)
+  ('Site E - Branch Office',  2, 'Comfort',   '3/2026', NULL)
 ON CONFLICT DO NOTHING;
