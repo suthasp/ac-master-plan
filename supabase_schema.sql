@@ -49,13 +49,15 @@ CREATE OR REPLACE TRIGGER trg_entries_updated_at
 ALTER TABLE public.sites ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.plan_entries ENABLE ROW LEVEL SECURITY;
 
--- Authenticated users can read/write everything
-CREATE POLICY "auth_read_sites"   ON public.sites FOR SELECT TO authenticated USING (true);
+-- Public (anonymous) visitors can READ everything — dashboard is view-only public
+CREATE POLICY "public_read_sites"   ON public.sites        FOR SELECT TO anon, authenticated USING (true);
+CREATE POLICY "public_read_entries" ON public.plan_entries FOR SELECT TO anon, authenticated USING (true);
+
+-- Only authenticated users can write
 CREATE POLICY "auth_insert_sites" ON public.sites FOR INSERT TO authenticated WITH CHECK (true);
 CREATE POLICY "auth_update_sites" ON public.sites FOR UPDATE TO authenticated USING (true);
 CREATE POLICY "auth_delete_sites" ON public.sites FOR DELETE TO authenticated USING (true);
 
-CREATE POLICY "auth_read_entries"   ON public.plan_entries FOR SELECT TO authenticated USING (true);
 CREATE POLICY "auth_insert_entries" ON public.plan_entries FOR INSERT TO authenticated WITH CHECK (true);
 CREATE POLICY "auth_update_entries" ON public.plan_entries FOR UPDATE TO authenticated USING (true);
 CREATE POLICY "auth_delete_entries" ON public.plan_entries FOR DELETE TO authenticated USING (true);

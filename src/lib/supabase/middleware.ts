@@ -23,14 +23,9 @@ export async function updateSession(request: NextRequest) {
     }
   );
 
-  const { data: { user } } = await supabase.auth.getUser();
-
-  if (!user && !request.nextUrl.pathname.startsWith("/login") &&
-      !request.nextUrl.pathname.startsWith("/auth")) {
-    const url = request.nextUrl.clone();
-    url.pathname = "/login";
-    return NextResponse.redirect(url);
-  }
+  // Refresh the session cookie. No route is force-protected: the dashboard is
+  // public (view-only) and pages/APIs enforce their own access where needed.
+  await supabase.auth.getUser();
 
   return supabaseResponse;
 }

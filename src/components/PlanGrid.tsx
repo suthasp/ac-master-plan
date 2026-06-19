@@ -75,9 +75,10 @@ function cellClass(status: string, week: number, currentWeek: number) {
 interface Props {
   year?: number;
   isAdmin?: boolean;
+  isLoggedIn?: boolean;
 }
 
-export default function PlanGrid({ year = 2026, isAdmin = false }: Props) {
+export default function PlanGrid({ year = 2026, isAdmin = false, isLoggedIn = false }: Props) {
   const gridRef = useRef<AgGridReact<RowData>>(null);
   const [rowData, setRowData] = useState<RowData[]>([]);
   const [loading, setLoading] = useState(true);
@@ -121,6 +122,7 @@ export default function PlanGrid({ year = 2026, isAdmin = false }: Props) {
 
   // ── Cell click cycle ────────────────────────────────────────────────────────
   const onCellClicked = useCallback(async (e: CellClickedEvent<RowData>) => {
+    if (!isLoggedIn) return; // view-only for anonymous visitors
     const field = e.colDef.field;
     if (!field?.startsWith("wk_")) return;
 
@@ -145,7 +147,7 @@ export default function PlanGrid({ year = 2026, isAdmin = false }: Props) {
     } finally {
       setSaving(false);
     }
-  }, [year]);
+  }, [year, isLoggedIn]);
 
   // ── Edit site field (admin inline edit) ──────────────────────────────────────
   const onCellValueChanged = useCallback(async (e: CellValueChangedEvent<RowData>) => {
