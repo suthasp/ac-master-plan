@@ -41,7 +41,7 @@ export default function DashboardClient({
             onClick={() => router.push("/sheet")}
             className="text-[var(--text-muted)] hover:text-blue-400 transition-colors"
           >
-            Sheet
+            PM Results
           </button>
         </div>
 

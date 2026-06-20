@@ -36,7 +36,7 @@ export default function SheetClient({
           <span className="font-bold text-blue-400">❄️ AC Master Plan 2026 (AMC)</span>
           <button onClick={() => router.push("/dashboard")} className="text-[var(--text-muted)] hover:text-blue-400">Plan</button>
           <button onClick={() => router.push("/insights")} className="text-[var(--text-muted)] hover:text-blue-400">Insights</button>
-          <span className="text-blue-400 font-semibold">Sheet</span>
+          <span className="text-blue-400 font-semibold">PM Results</span>
         </div>
         <div className="flex items-center gap-3">
           <ThemeToggle />
@@ -52,8 +52,8 @@ export default function SheetClient({
       </div>
 
       <div className="px-4 py-2 flex-shrink-0">
-        <h1 className="text-lg font-bold">📄 Google Sheet</h1>
-        <p className="text-[var(--text-muted)] text-xs">ดึงข้อมูลสดจาก Google Sheet ที่เผยแพร่ (อ่านอย่างเดียว)</p>
+        <h1 className="text-lg font-bold">📄 PM Results</h1>
+        <p className="text-[var(--text-muted)] text-xs">ผลการบำรุงรักษา (PM) — ดึงข้อมูลสดจาก Google Sheet (อ่านอย่างเดียว)</p>
       </div>
 
       {error ? (

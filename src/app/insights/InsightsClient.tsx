@@ -186,7 +186,7 @@ export default function InsightsClient({
           <span className="font-bold text-blue-400">❄️ AC Master Plan 2026 (AMC)</span>
           <button onClick={() => router.push("/dashboard")} className="text-[var(--text-muted)] hover:text-blue-400">Plan</button>
           <span className="text-blue-400 font-semibold">Insights</span>
-          <button onClick={() => router.push("/sheet")} className="text-[var(--text-muted)] hover:text-blue-400">Sheet</button>
+          <button onClick={() => router.push("/sheet")} className="text-[var(--text-muted)] hover:text-blue-400">PM Results</button>
         </div>
         <div className="flex items-center gap-3">
           <ThemeToggle />
