@@ -68,10 +68,12 @@ const MONTHS = [
 ];
 
 function getCurrentWeek(): number {
+  // Weeks start on Monday (ISO-style); week 26 begins Monday 22 June 2026.
+  const WEEK26_START = new Date(2026, 5, 22); // month 5 = June
   const now = new Date();
-  const start = new Date(now.getFullYear(), 0, 1);
-  const diff = now.getTime() - start.getTime();
-  return Math.ceil((diff / 86400000 + start.getDay() + 1) / 7);
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const diffDays = Math.round((today.getTime() - WEEK26_START.getTime()) / 86400000);
+  return 26 + Math.floor(diffDays / 7);
 }
 
 const STATUS_CYCLE: Record<string, string> = { "": "P", P: "F", F: "" };
