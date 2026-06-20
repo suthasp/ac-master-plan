@@ -43,6 +43,14 @@ export default function DashboardClient({
           >
             PM Results
           </button>
+          {isAdmin && (
+            <button
+              onClick={() => router.push("/users")}
+              className="text-[var(--text-muted)] hover:text-blue-400 transition-colors"
+            >
+              Users
+            </button>
+          )}
         </div>
 
         <div className="flex items-center gap-3">

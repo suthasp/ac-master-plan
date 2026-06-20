@@ -223,6 +223,7 @@ export default function InsightsClient({
           <button onClick={() => router.push("/dashboard")} className="text-[var(--text-muted)] hover:text-blue-400">Plan</button>
           <span className="text-blue-400 font-semibold">Insights</span>
           <button onClick={() => router.push("/sheet")} className="text-[var(--text-muted)] hover:text-blue-400">PM Results</button>
+          {isAdmin && <button onClick={() => router.push("/users")} className="text-[var(--text-muted)] hover:text-blue-400">Users</button>}
         </div>
         <div className="flex items-center gap-3">
           <ThemeToggle />
