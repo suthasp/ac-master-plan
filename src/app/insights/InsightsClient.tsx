@@ -128,11 +128,40 @@ export default function InsightsClient({
         groups.get(pre)!.push(r);
       }
       const groupArr = Array.from(groups.entries())
-        .sort((a, b) => a[0].localeCompare(b[0]))
+        .sort((a, b) => {
+          const ca = a[0] === "CAT" ? 1 : 0;
+          const cb = b[0] === "CAT" ? 1 : 0;
+          if (ca !== cb) return ca - cb; // CAT always last
+          return a[0].localeCompare(b[0]);
+        })
         .map(([prefix, rs]) => ({ prefix, rows: rs.sort((a, b) => a.name.localeCompare(b.name)) }));
       return { siteType: t, groups: groupArr };
     });
   }, [sites, round]);
+
+  // split long sections (e.g. Medium) into two balanced columns
+  const panels = useMemo(() => {
+    type Group = (typeof summary)[number]["groups"];
+    const out: { key: string; siteType: string; groups: Group }[] = [];
+    for (const sec of summary) {
+      const totalRows = sec.groups.reduce((a, g) => a + g.rows.length, 0);
+      if (totalRows <= 16) {
+        out.push({ key: sec.siteType, siteType: sec.siteType, groups: sec.groups });
+        continue;
+      }
+      const half = Math.ceil(totalRows / 2);
+      const first: Group = [];
+      const second: Group = [];
+      let acc = 0;
+      for (const g of sec.groups) {
+        if (acc < half) { first.push(g); acc += g.rows.length; }
+        else second.push(g);
+      }
+      out.push({ key: `${sec.siteType}-1`, siteType: sec.siteType, groups: first });
+      out.push({ key: `${sec.siteType}-2`, siteType: `${sec.siteType} (ต่อ)`, groups: second });
+    }
+    return out;
+  }, [summary]);
 
   const axisColor = "#94a3b8";
   const card = "bg-[var(--panel)] border border-[var(--border)] rounded-xl p-5";
@@ -328,8 +357,8 @@ export default function InsightsClient({
                 AMC PM Air – สรุป PM Progress {round}/2026 (รายละเอียดทุก Site)
               </h2>
               <div className="grid lg:grid-cols-3 gap-4">
-                {summary.map(sec => (
-                  <div key={sec.siteType} className="border border-[var(--border)] rounded-lg overflow-hidden self-start">
+                {panels.map(sec => (
+                  <div key={sec.key} className="border border-[var(--border)] rounded-lg overflow-hidden self-start">
                     <div className="bg-blue-800 text-white text-center font-semibold py-1 text-sm">◆ {sec.siteType}</div>
                     <table className="w-full text-xs border-collapse">
                       <thead>
