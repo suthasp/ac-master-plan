@@ -127,12 +127,17 @@ export default function InsightsClient({
         if (!groups.has(pre)) groups.set(pre, []);
         groups.get(pre)!.push(r);
       }
+      // these prefixes are pinned to the end, in this order (others alphabetical)
+      const TAIL = ["CAT", "RN"];
+      const tailIdx = (p: string) => TAIL.indexOf(p);
       const groupArr = Array.from(groups.entries())
         .sort((a, b) => {
-          const ca = a[0] === "CAT" ? 1 : 0;
-          const cb = b[0] === "CAT" ? 1 : 0;
-          if (ca !== cb) return ca - cb; // CAT always last
-          return a[0].localeCompare(b[0]);
+          const ta = tailIdx(a[0]);
+          const tb = tailIdx(b[0]);
+          if (ta < 0 && tb < 0) return a[0].localeCompare(b[0]);
+          if (ta < 0) return -1;
+          if (tb < 0) return 1;
+          return ta - tb;
         })
         .map(([prefix, rs]) => ({ prefix, rows: rs.sort((a, b) => a.name.localeCompare(b.name)) }));
       return { siteType: t, groups: groupArr };
@@ -154,8 +159,10 @@ export default function InsightsClient({
       const second: Group = [];
       let acc = 0;
       for (const g of sec.groups) {
-        if (acc < half) { first.push(g); acc += g.rows.length; }
-        else second.push(g);
+        // keep the first column from overshooting half (always keep ≥1 group)
+        if (first.length === 0 || acc + g.rows.length <= half) {
+          first.push(g); acc += g.rows.length;
+        } else second.push(g);
       }
       out.push({ key: `${sec.siteType}-1`, siteType: sec.siteType, groups: first });
       out.push({ key: `${sec.siteType}-2`, siteType: `${sec.siteType} (ต่อ)`, groups: second });
