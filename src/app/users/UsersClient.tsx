@@ -30,8 +30,12 @@ export default function UsersClient({ userEmail }: { userEmail: string }) {
   const load = useCallback(async () => {
     setLoading(true);
     const res = await fetch("/api/users");
-    if (res.ok) setUsers(await res.json());
-    else showToast("error", "โหลดรายชื่อผู้ใช้ไม่สำเร็จ");
+    if (res.ok) {
+      setUsers(await res.json());
+    } else {
+      const e = await res.json().catch(() => ({}));
+      showToast("error", `โหลดไม่สำเร็จ (${res.status}): ${e.error || "unknown"}`);
+    }
     setLoading(false);
   }, [showToast]);
 
