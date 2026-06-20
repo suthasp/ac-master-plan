@@ -37,6 +37,12 @@ export default function DashboardClient({
           >
             Insights
           </button>
+          <button
+            onClick={() => router.push("/sheet")}
+            className="text-[var(--text-muted)] hover:text-blue-400 transition-colors"
+          >
+            Sheet
+          </button>
         </div>
 
         <div className="flex items-center gap-3">
