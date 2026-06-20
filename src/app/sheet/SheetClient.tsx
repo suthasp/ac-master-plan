@@ -13,12 +13,14 @@ export default function SheetClient({
   error,
   userEmail,
   isLoggedIn,
+  isAdmin,
 }: {
   headers: string[];
   rows: string[][];
   error: string;
   userEmail: string;
   isLoggedIn: boolean;
+  isAdmin: boolean;
 }) {
   const router = useRouter();
   const supabase = createClient();
@@ -37,12 +39,15 @@ export default function SheetClient({
           <button onClick={() => router.push("/dashboard")} className="text-[var(--text-muted)] hover:text-blue-400">Plan</button>
           <button onClick={() => router.push("/insights")} className="text-[var(--text-muted)] hover:text-blue-400">Insights</button>
           <span className="text-blue-400 font-semibold">PM Results</span>
+          {isAdmin && <button onClick={() => router.push("/users")} className="text-[var(--text-muted)] hover:text-blue-400">Users</button>}
         </div>
         <div className="flex items-center gap-3">
           <ThemeToggle />
           {isLoggedIn ? (
             <>
-              <span className="text-[var(--text-muted)] text-xs hidden sm:inline">{userEmail}</span>
+              <span className="text-[var(--text-muted)] text-xs hidden sm:inline">
+                {userEmail} <span className="text-blue-400">({isAdmin ? "admin" : "viewer"})</span>
+              </span>
               <button onClick={handleLogout} className="text-red-400 hover:text-red-300">Logout</button>
             </>
           ) : (

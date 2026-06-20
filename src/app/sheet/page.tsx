@@ -38,6 +38,16 @@ export default async function SheetPage() {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
+  let isAdmin = false;
+  if (user) {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .single();
+    isAdmin = profile?.role === "admin";
+  }
+
   let headers: string[] = [];
   let rows: string[][] = [];
   let error = "";
@@ -60,6 +70,7 @@ export default async function SheetPage() {
       error={error}
       userEmail={user?.email ?? ""}
       isLoggedIn={!!user}
+      isAdmin={isAdmin}
     />
   );
 }
