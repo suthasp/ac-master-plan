@@ -138,6 +138,7 @@ export default function UsersClient({ userEmail }: { userEmail: string }) {
               <span className="text-xs text-[var(--text-muted)]">Role</span>
               <select value={form.role} onChange={e => setForm(f => ({ ...f, role: e.target.value }))} className={input}>
                 <option value="viewer">viewer</option>
+                <option value="manager">manager</option>
                 <option value="admin">admin</option>
               </select>
             </label>
@@ -168,6 +169,7 @@ export default function UsersClient({ userEmail }: { userEmail: string }) {
                     <td className="px-4 py-2">
                       <select value={u.role} onChange={e => changeRole(u.id, e.target.value)} className={input}>
                         <option value="viewer">viewer</option>
+                        <option value="manager">manager</option>
                         <option value="admin">admin</option>
                       </select>
                     </td>

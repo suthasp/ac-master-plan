@@ -92,10 +92,11 @@ function cellClass(status: string, week: number, currentWeek: number) {
 interface Props {
   year?: number;
   isAdmin?: boolean;
+  isManager?: boolean;
   isLoggedIn?: boolean;
 }
 
-export default function PlanGrid({ year = 2026, isAdmin = false, isLoggedIn = false }: Props) {
+export default function PlanGrid({ year = 2026, isAdmin = false, isManager = false, isLoggedIn = false }: Props) {
   const { theme } = useTheme();
   const gridRef = useRef<AgGridReact<RowData>>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -490,9 +491,12 @@ export default function PlanGrid({ year = 2026, isAdmin = false, isLoggedIn = fa
 
   // ── Column definitions ──────────────────────────────────────────────────────
   const columnDefs = useMemo<(ColDef | ColGroupDef)[]>(() => {
-    // site fields are editable only for admins (never the SUMMARY row)
+    // text/type fields: admin only (never the SUMMARY row)
     const siteEditable = (p: { data?: RowData }) =>
       isAdmin && p.data?.id !== "__summary__";
+    // count + round fields: admin or manager
+    const numEditable = (p: { data?: RowData }) =>
+      (isAdmin || isManager) && p.data?.id !== "__summary__";
 
     const pinned: ColDef[] = [
       ...(isAdmin
@@ -519,15 +523,15 @@ export default function PlanGrid({ year = 2026, isAdmin = false, isLoggedIn = fa
           } as ColDef]
         : []),
       { field: "name", headerName: "Site", pinned: "left", width: 160, cellStyle: { fontWeight: 600 }, editable: siteEditable },
-      { field: "ac_count", headerName: "จำนวนทั้งหมด", pinned: "left", width: 100, type: "numericColumn", editable: siteEditable,
+      { field: "ac_count", headerName: "จำนวนทั้งหมด", pinned: "left", width: 100, type: "numericColumn", editable: numEditable,
         valueParser: p => parseInt(p.newValue, 10) || 0 },
       { field: "ac_type", headerName: "Type", pinned: "left", width: 100, editable: siteEditable,
         cellEditor: "agSelectCellEditor", cellEditorParams: { values: ["Precision", "Comfort"] } },
       { field: "site_type", headerName: "Site Type", pinned: "left", width: 100, editable: siteEditable,
         cellEditor: "agSelectCellEditor", cellEditorParams: { values: ["Big", "Medium"] } },
-      { field: "source_1", headerName: "รอบที่ 1", pinned: "left", width: 100, editable: siteEditable },
-      { field: "source_2", headerName: "รอบที่ 2", pinned: "left", width: 100, editable: siteEditable },
-      { field: "source_3", headerName: "รอบที่ 3", pinned: "left", width: 100, editable: siteEditable },
+      { field: "source_1", headerName: "รอบที่ 1", pinned: "left", width: 100, editable: numEditable },
+      { field: "source_2", headerName: "รอบที่ 2", pinned: "left", width: 100, editable: numEditable },
+      { field: "source_3", headerName: "รอบที่ 3", pinned: "left", width: 100, editable: numEditable },
     ];
 
     const monthGroups: ColGroupDef[] = MONTHS.map(month => ({
@@ -547,7 +551,7 @@ export default function PlanGrid({ year = 2026, isAdmin = false, isLoggedIn = fa
     }));
 
     return [...pinned, ...monthGroups];
-  }, [currentWeek, deleteRow, isAdmin]);
+  }, [currentWeek, deleteRow, isAdmin, isManager]);
 
   const getRowId = useCallback((p: GetRowIdParams<RowData>) => p.data.id as string, []);
 

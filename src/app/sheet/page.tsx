@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { getRole } from "@/lib/auth";
 import SheetClient from "./SheetClient";
 
 export const dynamic = "force-dynamic";
@@ -38,15 +39,7 @@ export default async function SheetPage() {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
-  let isAdmin = false;
-  if (user) {
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("role")
-      .eq("id", user.id)
-      .single();
-    isAdmin = profile?.role === "admin";
-  }
+  const role = await getRole(supabase);
 
   let headers: string[] = [];
   let rows: string[][] = [];
@@ -70,7 +63,7 @@ export default async function SheetPage() {
       error={error}
       userEmail={user?.email ?? ""}
       isLoggedIn={!!user}
-      isAdmin={isAdmin}
+      role={role}
     />
   );
 }

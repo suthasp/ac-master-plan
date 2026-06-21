@@ -29,12 +29,13 @@ const REMAIN_COLOR = "#9ca3af";
 export default function InsightsClient({
   userEmail,
   isLoggedIn,
-  isAdmin,
+  role,
 }: {
   userEmail: string;
   isLoggedIn: boolean;
-  isAdmin: boolean;
+  role: string;
 }) {
+  const isAdmin = role === "admin";
   const router = useRouter();
   const supabase = createClient();
   const [sites, setSites] = useState<Site[]>([]);
@@ -230,7 +231,7 @@ export default function InsightsClient({
           {isLoggedIn ? (
             <>
               <span className="text-[var(--text-muted)] text-xs hidden sm:inline">
-                {userEmail} <span className="text-blue-400">({isAdmin ? "admin" : "viewer"})</span>
+                {userEmail} <span className="text-blue-400">({role || "viewer"})</span>
               </span>
               <button onClick={handleLogout} className="text-red-400 hover:text-red-300">Logout</button>
             </>

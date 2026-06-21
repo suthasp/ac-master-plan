@@ -9,15 +9,17 @@ const PlanGrid = dynamic(() => import("@/components/PlanGrid"), { ssr: false });
 
 export default function DashboardClient({
   userEmail,
-  isAdmin,
+  role,
   isLoggedIn,
 }: {
   userEmail: string;
-  isAdmin: boolean;
+  role: string;
   isLoggedIn: boolean;
 }) {
   const router = useRouter();
   const supabase = createClient();
+  const isAdmin = role === "admin";
+  const isManager = role === "manager";
 
   async function handleLogout() {
     await supabase.auth.signOut();
@@ -58,7 +60,7 @@ export default function DashboardClient({
           {isLoggedIn ? (
             <>
               <span className="text-[var(--text-muted)] text-xs hidden sm:inline">
-                {userEmail} <span className="text-blue-400">({isAdmin ? "admin" : "viewer"})</span>
+                {userEmail} <span className="text-blue-400">({role || "viewer"})</span>
               </span>
               <button
                 onClick={handleLogout}
@@ -82,7 +84,7 @@ export default function DashboardClient({
       </div>
 
       <div className="flex-1 overflow-hidden">
-        <PlanGrid year={2026} isAdmin={isAdmin} isLoggedIn={isLoggedIn} />
+        <PlanGrid year={2026} isAdmin={isAdmin} isManager={isManager} isLoggedIn={isLoggedIn} />
       </div>
     </div>
   );

@@ -13,15 +13,16 @@ export default function SheetClient({
   error,
   userEmail,
   isLoggedIn,
-  isAdmin,
+  role,
 }: {
   headers: string[];
   rows: string[][];
   error: string;
   userEmail: string;
   isLoggedIn: boolean;
-  isAdmin: boolean;
+  role: string;
 }) {
+  const isAdmin = role === "admin";
   const router = useRouter();
   const supabase = createClient();
 
@@ -46,7 +47,7 @@ export default function SheetClient({
           {isLoggedIn ? (
             <>
               <span className="text-[var(--text-muted)] text-xs hidden sm:inline">
-                {userEmail} <span className="text-blue-400">({isAdmin ? "admin" : "viewer"})</span>
+                {userEmail} <span className="text-blue-400">({role || "viewer"})</span>
               </span>
               <button onClick={handleLogout} className="text-red-400 hover:text-red-300">Logout</button>
             </>
