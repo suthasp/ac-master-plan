@@ -187,20 +187,28 @@ export default function InsightsClient({
     : { background: "#ffffff", color: "#111" };
   const fmtPct = (pct: number | null) => (pct === null ? "" : `${pct}%`);
 
-  // value + percent label centered inside each donut segment
+  // value + percent label placed OUTSIDE each donut segment (with leader line),
+  // so thin slices stay readable
   const donutLabel = (p: {
     cx?: number; cy?: number; midAngle?: number;
-    innerRadius?: number; outerRadius?: number; value?: number; percent?: number;
+    outerRadius?: number; value?: number; percent?: number;
   }) => {
     const RAD = Math.PI / 180;
     const cx = p.cx ?? 0, cy = p.cy ?? 0, midAngle = p.midAngle ?? 0;
-    const inner = p.innerRadius ?? 0, outer = p.outerRadius ?? 0;
-    const r = inner + (outer - inner) / 2;
+    const r = (p.outerRadius ?? 0) + 16;
     const x = cx + r * Math.cos(-midAngle * RAD);
     const y = cy + r * Math.sin(-midAngle * RAD);
     return (
-      <text x={x} y={y} fill="#ffffff" textAnchor="middle" dominantBaseline="central" fontSize={13} fontWeight={700}>
-        {p.value} ({Math.round((p.percent ?? 0) * 100)}%)
+      <text
+        x={x}
+        y={y}
+        fill="var(--app-text)"
+        textAnchor={x >= cx ? "start" : "end"}
+        dominantBaseline="central"
+        fontSize={13}
+        fontWeight={700}
+      >
+        {p.value?.toLocaleString()} ({Math.round((p.percent ?? 0) * 100)}%)
       </text>
     );
   };
@@ -291,10 +299,10 @@ export default function InsightsClient({
                 {m.donut.length === 0 ? (
                   <div className="text-[var(--text-muted)] text-sm py-16 text-center">ยังไม่มีข้อมูล</div>
                 ) : (
-                  <ResponsiveContainer width="100%" height={280}>
-                    <PieChart>
-                      <Pie data={m.donut} dataKey="value" nameKey="name" innerRadius={60} outerRadius={100} paddingAngle={2} label={donutLabel} labelLine={false}>
-                        {m.donut.map((d, i) => <Cell key={i} fill={d.color} />)}
+                  <ResponsiveContainer width="100%" height={300}>
+                    <PieChart margin={{ top: 10, right: 60, bottom: 10, left: 60 }}>
+                      <Pie data={m.donut} dataKey="value" nameKey="name" cx="50%" cy="47%" innerRadius={58} outerRadius={88} paddingAngle={2} label={donutLabel} labelLine>
+                        {m.donut.map((d, i) => <Cell key={i} fill={d.color} stroke="var(--panel)" strokeWidth={2} />)}
                       </Pie>
                       <Tooltip {...tooltipProps} />
                       <Legend />
