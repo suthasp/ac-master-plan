@@ -4,8 +4,21 @@ import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import ThemeToggle from "@/components/ThemeToggle";
+import { FilterBar, useGridFilters, type FilterSpec } from "@/components/GridFilters";
 
 const CsvGrid = dynamic(() => import("@/components/CsvGrid"), { ssr: false });
+
+const FILTERS: FilterSpec[] = [
+  { key: "site", label: "Site", header: "Site", fallback: 1 },
+  {
+    key: "round",
+    label: "PM ครั้งที่",
+    header: "แบบบันทึกผลการบำรุงรักษาเครื่องปรับอากาศ (Precision Air) ครั้งที่",
+    fallback: 2,
+  },
+  { key: "region1", label: "Region1", header: "Region1", fallback: 39 },
+  { key: "acType", label: "แอร์ชนิด", header: "แอร์ชนิด", fallback: 38 },
+];
 
 export default function SheetClient({
   headers,
@@ -25,6 +38,7 @@ export default function SheetClient({
   const isAdmin = role === "admin";
   const router = useRouter();
   const supabase = createClient();
+  const filters = useGridFilters(headers, rows, FILTERS);
 
   async function handleLogout() {
     await supabase.auth.signOut();
@@ -68,14 +82,20 @@ export default function SheetClient({
           โหลดข้อมูลไม่สำเร็จ: {error}
         </div>
       ) : (
-        <div className="flex-1 min-h-0 px-4 pb-4">
-          <CsvGrid
-            headers={headers}
-            rows={rows}
-            sheetName="PM Results"
-            fileBaseName="pm-results"
-          />
-        </div>
+        <>
+          <div className="px-4 pb-2 flex-shrink-0">
+            <FilterBar filters={filters} />
+          </div>
+
+          <div className="flex-1 min-h-0 px-4 pb-4">
+            <CsvGrid
+              headers={headers}
+              rows={filters.rowsFiltered}
+              sheetName="PM Results"
+              fileBaseName="pm-results"
+            />
+          </div>
+        </>
       )}
     </div>
   );
