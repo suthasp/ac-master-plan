@@ -170,7 +170,12 @@ export default function CmClient({
           </div>
 
           <div className="flex-1 min-h-0 px-4 pb-4">
-            <CsvGrid headers={headers} rows={rowsFiltered} />
+            <CsvGrid
+              headers={headers}
+              rows={rowsFiltered}
+              sheetName="CM Results"
+              fileBaseName="cm-results"
+            />
           </div>
         </>
       )}

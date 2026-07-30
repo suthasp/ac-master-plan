@@ -69,7 +69,12 @@ export default function SheetClient({
         </div>
       ) : (
         <div className="flex-1 min-h-0 px-4 pb-4">
-          <CsvGrid headers={headers} rows={rows} />
+          <CsvGrid
+            headers={headers}
+            rows={rows}
+            sheetName="PM Results"
+            fileBaseName="pm-results"
+          />
         </div>
       )}
     </div>
