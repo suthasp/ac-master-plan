@@ -25,7 +25,7 @@ function cellRenderer(p: ICellRendererParams) {
   return v;
 }
 
-export default function SheetGrid({
+export default function CsvGrid({
   headers,
   rows,
 }: {

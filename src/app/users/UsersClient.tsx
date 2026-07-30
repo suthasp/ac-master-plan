@@ -109,6 +109,7 @@ export default function UsersClient({ userEmail }: { userEmail: string }) {
           <button onClick={() => router.push("/dashboard")} className="text-[var(--text-muted)] hover:text-blue-400">Plan</button>
           <button onClick={() => router.push("/insights")} className="text-[var(--text-muted)] hover:text-blue-400">Insights</button>
           <button onClick={() => router.push("/sheet")} className="text-[var(--text-muted)] hover:text-blue-400">PM Results</button>
+          <button onClick={() => router.push("/cm")} className="text-[var(--text-muted)] hover:text-blue-400">CM Results</button>
           <span className="text-blue-400 font-semibold">Users</span>
         </div>
         <div className="flex items-center gap-3">

@@ -7,7 +7,7 @@ import ThemeToggle from "@/components/ThemeToggle";
 
 const CsvGrid = dynamic(() => import("@/components/CsvGrid"), { ssr: false });
 
-export default function SheetClient({
+export default function CmClient({
   headers,
   rows,
   error,
@@ -39,8 +39,8 @@ export default function SheetClient({
           <span className="font-bold text-blue-400">❄️ AC Master Plan 2026 (AMC)</span>
           <button onClick={() => router.push("/dashboard")} className="text-[var(--text-muted)] hover:text-blue-400">Plan</button>
           <button onClick={() => router.push("/insights")} className="text-[var(--text-muted)] hover:text-blue-400">Insights</button>
-          <span className="text-blue-400 font-semibold">PM Results</span>
-          <button onClick={() => router.push("/cm")} className="text-[var(--text-muted)] hover:text-blue-400">CM Results</button>
+          <button onClick={() => router.push("/sheet")} className="text-[var(--text-muted)] hover:text-blue-400">PM Results</button>
+          <span className="text-blue-400 font-semibold">CM Results</span>
           {isAdmin && <button onClick={() => router.push("/users")} className="text-[var(--text-muted)] hover:text-blue-400">Users</button>}
         </div>
         <div className="flex items-center gap-3">
@@ -59,8 +59,8 @@ export default function SheetClient({
       </div>
 
       <div className="px-4 py-2 flex-shrink-0">
-        <h1 className="text-lg font-bold">📄 PM Results</h1>
-        <p className="text-[var(--text-muted)] text-xs">ผลการบำรุงรักษา (PM) — ดึงข้อมูลสดจาก Google Sheet (อ่านอย่างเดียว)</p>
+        <h1 className="text-lg font-bold">🛠️ CM Results</h1>
+        <p className="text-[var(--text-muted)] text-xs">ผลการซ่อมแซมแก้ไข (CM) — ดึงข้อมูลสดจาก Google Sheet (อ่านอย่างเดียว)</p>
       </div>
 
       {error ? (

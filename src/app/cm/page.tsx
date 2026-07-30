@@ -1,14 +1,14 @@
 import { createClient } from "@/lib/supabase/server";
 import { getRole } from "@/lib/auth";
 import { fetchSheetCSV } from "@/lib/csv";
-import SheetClient from "./SheetClient";
+import CmClient from "./CmClient";
 
 export const dynamic = "force-dynamic";
 
 const CSV_URL =
-  "https://docs.google.com/spreadsheets/d/e/2PACX-1vQT_kYRb6046P3S6NXTZB7yTk4Za3pAY2gb1rA0fuwb4t12GhrM79lEhVXLru0odwXJRzgDHuRKSW-m/pub?gid=1213064501&single=true&output=csv";
+  "https://docs.google.com/spreadsheets/d/e/2PACX-1vQQvngGGOY9JoMIeWBjSrXsJ3LGXLuLijSyCWvgoZNFEThads_vwnAWfM3Yt32jZlfu9JIYIYbcgWer/pub?gid=1331082262&single=true&output=csv";
 
-export default async function SheetPage() {
+export default async function CmPage() {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
@@ -16,7 +16,7 @@ export default async function SheetPage() {
   const { headers, rows, error } = await fetchSheetCSV(CSV_URL);
 
   return (
-    <SheetClient
+    <CmClient
       headers={headers}
       rows={rows}
       error={error}
