@@ -41,3 +41,7 @@ export async function fetchSheetCSV(url: string): Promise<{
     return { headers: [], rows: [], error: (e as Error).message };
   }
 }
+
+/** Published PM Results sheet — shared by the PM Results grid and the PM dashboard. */
+export const PM_CSV_URL =
+  "https://docs.google.com/spreadsheets/d/e/2PACX-1vQT_kYRb6046P3S6NXTZB7yTk4Za3pAY2gb1rA0fuwb4t12GhrM79lEhVXLru0odwXJRzgDHuRKSW-m/pub?gid=1213064501&single=true&output=csv";

@@ -40,6 +40,12 @@ export default function DashboardClient({
             Insights
           </button>
           <button
+            onClick={() => router.push("/pm-dashboard")}
+            className="text-[var(--text-muted)] hover:text-blue-400 transition-colors"
+          >
+            Dashboard PM
+          </button>
+          <button
             onClick={() => router.push("/sheet")}
             className="text-[var(--text-muted)] hover:text-blue-400 transition-colors"
           >

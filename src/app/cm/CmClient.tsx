@@ -54,6 +54,7 @@ export default function CmClient({
           <span className="font-bold text-blue-400">❄️ AC Master Plan 2026 (AMC)</span>
           <button onClick={() => router.push("/dashboard")} className="text-[var(--text-muted)] hover:text-blue-400">Plan</button>
           <button onClick={() => router.push("/insights")} className="text-[var(--text-muted)] hover:text-blue-400">Insights</button>
+          <button onClick={() => router.push("/pm-dashboard")} className="text-[var(--text-muted)] hover:text-blue-400">Dashboard PM</button>
           <button onClick={() => router.push("/sheet")} className="text-[var(--text-muted)] hover:text-blue-400">PM Results</button>
           <span className="text-blue-400 font-semibold">CM Results</span>
           {isAdmin && <button onClick={() => router.push("/users")} className="text-[var(--text-muted)] hover:text-blue-400">Users</button>}
