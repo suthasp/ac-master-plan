@@ -232,6 +232,7 @@ export default function InsightsClient({
           <button onClick={() => router.push("/dashboard")} className="text-[var(--text-muted)] hover:text-blue-400">Plan</button>
           <span className="text-blue-400 font-semibold">Insights</span>
           <button onClick={() => router.push("/pm-dashboard")} className="text-[var(--text-muted)] hover:text-blue-400">Dashboard PM</button>
+          <button onClick={() => router.push("/cm-dashboard")} className="text-[var(--text-muted)] hover:text-blue-400">Dashboard CM</button>
           <button onClick={() => router.push("/sheet")} className="text-[var(--text-muted)] hover:text-blue-400">PM Results</button>
           <button onClick={() => router.push("/cm")} className="text-[var(--text-muted)] hover:text-blue-400">CM Results</button>
           {isAdmin && <button onClick={() => router.push("/users")} className="text-[var(--text-muted)] hover:text-blue-400">Users</button>}

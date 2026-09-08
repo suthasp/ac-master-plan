@@ -1,11 +1,11 @@
 import { createClient } from "@/lib/supabase/server";
 import { getRole } from "@/lib/auth";
 import { fetchSheetCSV, CM_CSV_URL } from "@/lib/csv";
-import CmClient from "./CmClient";
+import CmDashboardClient from "./CmDashboardClient";
 
 export const dynamic = "force-dynamic";
 
-export default async function CmPage() {
+export default async function CmDashboardPage() {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
@@ -13,7 +13,7 @@ export default async function CmPage() {
   const { headers, rows, error } = await fetchSheetCSV(CM_CSV_URL);
 
   return (
-    <CmClient
+    <CmDashboardClient
       headers={headers}
       rows={rows}
       error={error}

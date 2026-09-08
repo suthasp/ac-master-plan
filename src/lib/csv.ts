@@ -45,3 +45,7 @@ export async function fetchSheetCSV(url: string): Promise<{
 /** Published PM Results sheet — shared by the PM Results grid and the PM dashboard. */
 export const PM_CSV_URL =
   "https://docs.google.com/spreadsheets/d/e/2PACX-1vQT_kYRb6046P3S6NXTZB7yTk4Za3pAY2gb1rA0fuwb4t12GhrM79lEhVXLru0odwXJRzgDHuRKSW-m/pub?gid=1213064501&single=true&output=csv";
+
+/** Published CM Results sheet — shared by the CM Results grid and the CM dashboard. */
+export const CM_CSV_URL =
+  "https://docs.google.com/spreadsheets/d/e/2PACX-1vQQvngGGOY9JoMIeWBjSrXsJ3LGXLuLijSyCWvgoZNFEThads_vwnAWfM3Yt32jZlfu9JIYIYbcgWer/pub?gid=1331082262&single=true&output=csv";

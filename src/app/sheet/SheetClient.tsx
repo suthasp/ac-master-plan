@@ -54,6 +54,7 @@ export default function SheetClient({
           <button onClick={() => router.push("/dashboard")} className="text-[var(--text-muted)] hover:text-blue-400">Plan</button>
           <button onClick={() => router.push("/insights")} className="text-[var(--text-muted)] hover:text-blue-400">Insights</button>
           <button onClick={() => router.push("/pm-dashboard")} className="text-[var(--text-muted)] hover:text-blue-400">Dashboard PM</button>
+          <button onClick={() => router.push("/cm-dashboard")} className="text-[var(--text-muted)] hover:text-blue-400">Dashboard CM</button>
           <span className="text-blue-400 font-semibold">PM Results</span>
           <button onClick={() => router.push("/cm")} className="text-[var(--text-muted)] hover:text-blue-400">CM Results</button>
           {isAdmin && <button onClick={() => router.push("/users")} className="text-[var(--text-muted)] hover:text-blue-400">Users</button>}
