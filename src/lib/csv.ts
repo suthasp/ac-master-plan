@@ -46,14 +46,6 @@ export async function fetchSheetCSV(url: string): Promise<{
 export const PM_CSV_URL =
   "https://docs.google.com/spreadsheets/d/e/2PACX-1vQT_kYRb6046P3S6NXTZB7yTk4Za3pAY2gb1rA0fuwb4t12GhrM79lEhVXLru0odwXJRzgDHuRKSW-m/pub?gid=1213064501&single=true&output=csv";
 
-/** Published CM Results sheet — read by the CM Results grid. */
+/** Published CM Results sheet — shared by the CM Results grid and the CM dashboard. */
 export const CM_CSV_URL =
-  "https://docs.google.com/spreadsheets/d/e/2PACX-1vQQvngGGOY9JoMIeWBjSrXsJ3LGXLuLijSyCWvgoZNFEThads_vwnAWfM3Yt32jZlfu9JIYIYbcgWer/pub?gid=1331082262&single=true&output=csv";
-
-/**
- * CM Results, wider layout (Sub Contractor company in column B, plus Region and
- * Month columns). Same 1,258 records as CM_CSV_URL but a different column
- * order, so the two are not interchangeable — the dashboard reads this one.
- */
-export const CM_DASHBOARD_CSV_URL =
   "https://docs.google.com/spreadsheets/d/e/2PACX-1vQT_kYRb6046P3S6NXTZB7yTk4Za3pAY2gb1rA0fuwb4t12GhrM79lEhVXLru0odwXJRzgDHuRKSW-m/pub?gid=526059949&single=true&output=csv";

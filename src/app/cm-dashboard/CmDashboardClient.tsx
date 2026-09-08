@@ -26,9 +26,8 @@ function colIndex(headers: string[], header: string, fallback: number) {
   return i >= 0 ? i : fallback;
 }
 
-// Positions follow CM_DASHBOARD_CSV_URL, whose column order differs from the
-// sheet behind the CM Results grid. The header names are what actually match;
-// the numbers only cover a rename.
+// The header names are what actually match a column; the numbers below only
+// cover a rename.
 const HEADER = {
   subContractor: "Sub Contractor",
   site: "Site",
@@ -37,13 +36,6 @@ const HEADER = {
   acType: "แอร์ชนิด",
   region: "Region1",
 };
-
-const FILTERS: FilterSpec[] = [
-  { key: "site", label: "Site", header: HEADER.site, fallback: 2 },
-  { key: "region1", label: "Region1", header: HEADER.region, fallback: 22 },
-  { key: "acType", label: "แอร์ชนิด", header: HEADER.acType, fallback: 19 },
-  { key: "subContractor", label: "Sub Contractor", header: HEADER.subContractor, fallback: 1 },
-];
 
 /** "25/6/2026" → { year: "2026", key: "2026-06" }; blank for any other format. */
 function parseDate(raw: string): { year: string; key: string } {
@@ -68,6 +60,25 @@ const monthLabel = (key: string) => {
   const [y, mm] = key.split("-");
   return `${TH_MONTHS[Number(mm) - 1]} ${y.slice(2)}`;
 };
+
+// Declared after the date helpers because the Month spec references them.
+const FILTERS: FilterSpec[] = [
+  { key: "site", label: "Site", header: HEADER.site, fallback: 2 },
+  { key: "region1", label: "Region1", header: HEADER.region, fallback: 22 },
+  { key: "acType", label: "แอร์ชนิด", header: HEADER.acType, fallback: 19 },
+  { key: "subContractor", label: "Sub Contractor", header: HEADER.subContractor, fallback: 1 },
+  {
+    key: "month",
+    label: "Month",
+    header: HEADER.date,
+    fallback: 7,
+    // ticked values are the sortable "2026-06" key, shown as "มิ.ย. 26"
+    derive: raw => parseDate(raw).key,
+    format: monthLabel,
+    sortDesc: true,
+    multi: true,
+  },
+];
 
 export default function CmDashboardClient({
   headers,

@@ -16,9 +16,9 @@ function yearOf(value: string): string {
 }
 
 const FILTERS: FilterSpec[] = [
-  { key: "site", label: "Site", header: "Site", fallback: 6 },
-  { key: "year", label: "ปีที่ทำ CM", header: "วันที่ทำ CM", fallback: 12, derive: yearOf, sortDesc: true },
-  { key: "acType", label: "แอร์ชนิด", header: "แอร์ชนิด", fallback: 7 },
+  { key: "site", label: "Site", header: "Site", fallback: 2 },
+  { key: "year", label: "ปีที่ทำ CM", header: "วันที่ทำ CM", fallback: 7, derive: yearOf, sortDesc: true },
+  { key: "acType", label: "แอร์ชนิด", header: "แอร์ชนิด", fallback: 19 },
 ];
 
 export default function CmClient({
