@@ -26,18 +26,23 @@ function colIndex(headers: string[], header: string, fallback: number) {
   return i >= 0 ? i : fallback;
 }
 
+// Positions follow CM_DASHBOARD_CSV_URL, whose column order differs from the
+// sheet behind the CM Results grid. The header names are what actually match;
+// the numbers only cover a rename.
 const HEADER = {
+  subContractor: "Sub Contractor",
   site: "Site",
+  brand: "เครื่องปรับอากาศยี่ห้อ",
+  date: "วันที่ทำ CM",
   acType: "แอร์ชนิด",
   region: "Region1",
-  brand: "ยี่ห้อ",
-  date: "วันที่ทำ CM",
 };
 
 const FILTERS: FilterSpec[] = [
-  { key: "site", label: "Site", header: HEADER.site, fallback: 6 },
-  { key: "region1", label: "Region1", header: HEADER.region, fallback: 1 },
-  { key: "acType", label: "แอร์ชนิด", header: HEADER.acType, fallback: 7 },
+  { key: "site", label: "Site", header: HEADER.site, fallback: 2 },
+  { key: "region1", label: "Region1", header: HEADER.region, fallback: 22 },
+  { key: "acType", label: "แอร์ชนิด", header: HEADER.acType, fallback: 19 },
+  { key: "subContractor", label: "Sub Contractor", header: HEADER.subContractor, fallback: 1 },
 ];
 
 /** "25/6/2026" → { year: "2026", key: "2026-06" }; blank for any other format. */
@@ -48,8 +53,9 @@ function parseDate(raw: string): { year: string; key: string } {
 }
 
 /**
- * A few rows carry a Buddhist-era year (e.g. 2569). They still count in the
- * totals, but they sort after the real ones so a typo never heads the list.
+ * Guards against a Buddhist-era year being typed into a date (e.g. 2569): such
+ * a row still counts in the totals, but sorts after the real years so a typo
+ * never heads the list.
  */
 const isPlausibleYear = (y: string) => Number(y) >= 1990 && Number(y) <= 2100;
 
@@ -85,11 +91,11 @@ export default function CmDashboardClient({
 
   const idx = useMemo(
     () => ({
-      site: colIndex(headers, HEADER.site, 6),
-      acType: colIndex(headers, HEADER.acType, 7),
-      region: colIndex(headers, HEADER.region, 1),
-      brand: colIndex(headers, HEADER.brand, 8),
-      date: colIndex(headers, HEADER.date, 12),
+      site: colIndex(headers, HEADER.site, 2),
+      acType: colIndex(headers, HEADER.acType, 19),
+      region: colIndex(headers, HEADER.region, 22),
+      brand: colIndex(headers, HEADER.brand, 3),
+      date: colIndex(headers, HEADER.date, 7),
     }),
     [headers]
   );
